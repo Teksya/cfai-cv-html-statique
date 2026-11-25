@@ -47,6 +47,7 @@ Contact : **lien vers le profil GitHub uniquement** (texte explicite, ex. « Voi
 ├─ cv_base.md            # contenu source
 ├─ grille_evaluation.md  # grille de notation du sujet
 ├─ robots.txt
+├─ sitemap.xml
 ├─ AGENTS.md
 ├─ CLAUDE.md             # charge AGENTS.md
 └─ README.md             # consignes + section « Auto-évaluation »
@@ -105,6 +106,8 @@ Thème sombre (`prefers-color-scheme`) : « aile désaffectée » du labo, panne
 - **Panneau de chambre** (`.chamber-head`) : plaque rétroéclairée avec grand numéro fin (`.chamber-num`), kicker « Chambre de test 0X sur 06 », `h2`, barre de progression (`.sign-bar`, variable `--p`) et pictogrammes (`.sign-icons`).
 - **Plaques** (`.panel`) : cartes blanches à deux vis ; compétences en étiquettes (`.chips`), expériences en `article.card`, projets en `.card-list`, formation en `.timeline` numérotée.
 - **Portails** (`.portal` > `.portal-view` + SVG `<use href="#portal-rim">`) : bord en flamme par filtre SVG (`#f-rim` : turbulence animée, double halo), lumière projetée sur le mur, vue de l'autre côté avec récursion (on aperçoit l'autre portail au fond), montés en perspective sur les murs ; un portail est posé au sol sur la Lune.
+- **Scène de niveau** (`.level-scene.level-<id>`, `aria-hidden`) en bas de chaque chambre 01–05 : une énigme puis une porte de sortie (`.exit`) reliée par un fil indicateur (`.wire`). 01 cube et bouton, 02 pont de lumière, 03 laser et récepteur, 04 plaque de propulsion et trajectoire, 05 gels. Le HTML/CSS montre l'état **résolu** ; avec JS, `.js .level-scene:not(.is-cleared)` montre l'état non résolu et `app.js` ajoute `is-cleared` quand la scène est visible à 80 % (porte qui s'ouvre, fil orange, voix « Niveau 0X terminé »). Une nouvelle énigme : un bloc d'éléments décoratifs + sa règle « non résolu ».
+- **Entrée de niveau** : avec JS et sans `prefers-reduced-motion`, les plaques se déplient du mur quand la chambre entre à l'écran (`.chamber.is-in`). Jamais en vue classique ni à l'impression.
 - **Accueil** : fenêtre de salle d'observation, deux portails face à face, cube au sol.
 - **Final** : brèche dans le plafond, étoiles sur deux couches, Terre éclairée de côté, cube à la dérive, sol lunaire SVG à cratères.
 - **Narrateur** (JS, ≥ 900 px, `aria-hidden`) : une phrase originale par chambre (`data-annonce`), ton pince-sans-rire, effacée après 7 s et en bas de page.
@@ -118,7 +121,7 @@ Police système sans-serif, texte ≥ 16 px. Numéros de chambre en graisse 200,
 
 - Aucune couleur `--portal-*` ne porte du texte. Ne pas éclaircir `--ink-muted`, `--blue`, `--orange`.
 - Focus : contour `--blue` 2 px + halo ; contour blanc sur fonds sombres (en-tête, espace).
-- Animations d'ambiance (champs, portails, étoiles, cube) coupées par `prefers-reduced-motion` ; la flamme SVG (SMIL) est mise en pause par `app.js`. Transitions d'interface ≤ 200 ms.
+- Animations d'ambiance (champs, portails, étoiles, cube, énigmes) coupées par `prefers-reduced-motion` ; la flamme SVG (SMIL) est mise en pause par `app.js`, et aussi quand aucun portail n'est à l'écran (performance). Transitions d'interface ≤ 200 ms.
 - `forced-colors` : décor masqué, bordures `CanvasText`.
 
 ### Responsive

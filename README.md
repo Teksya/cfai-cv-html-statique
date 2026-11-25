@@ -12,7 +12,7 @@ CV en ligne sur une seule page HTML, présenté comme un parcours de **chambres 
 
 ## Concept
 
-- Chaque section du CV est une chambre de test numérotée (00 accueil → 06 contact), avec son panneau, sa barre de progression et ses pictogrammes.
+- Chaque section du CV est un **niveau** : une chambre de test numérotée (00 accueil → 06 contact) avec son panneau, ses plaques qui se déplient du mur à l'arrivée et, en bas, une énigme (cube et bouton, pont de lumière, laser, plaque de propulsion, gels) qui se résout quand on atteint la fin de la section : la porte de sortie s'ouvre.
 - Décor réaliste en CSS/SVG, sans image : panneaux muraux biseautés, champs d'énergie, grilles de sol, portails au bord en flamme (filtre SVG) qui laissent voir l'autre côté.
 - Final : le plafond de la dernière chambre est éventré, on sort sur la Lune avec la Terre dans le ciel.
 - Les liens internes « téléportent » : portail bleu au clic, portail orange à l'arrivée.
@@ -40,6 +40,7 @@ index.html            page unique
 css/style.css         thème, composants, vue classique, impression
 js/app.js             portails, narrateur, vue classique
 cv-olivier-dutoit.pdf export PDF du CV
+robots.txt, sitemap.xml référencement
 cv_base.md            contenu source du CV
 grille_evaluation.md  grille de notation du sujet
 AGENTS.md             consignes pour les agents IA
@@ -54,4 +55,7 @@ _À compléter._
 - PageSpeed (mobile) : Performance …, Accessibilité …, Bonnes pratiques …, SEO …
 - Améliorations V1 → finale :
   - V1 (thème « rue en papier découpé ») : un seul fichier `index.html` de 309 ko avec police embarquée en base64 → refonte en HTML/CSS/JS séparés, sans webfont (≈ 65 ko au total, 16 ko compressés).
+  - Données structurées `Person` (JSON-LD), `sitemap.xml`, `theme-color` clair/sombre.
+  - Contrastes vérifiés par calcul : tous les couples texte/fond ≥ 5,7:1 (AA).
+  - Animations SVG des portails mises en pause hors écran (CPU mobile).
   - …
