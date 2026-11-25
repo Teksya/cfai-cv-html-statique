@@ -127,6 +127,12 @@
       '<div class="wall wall-right"></div><div class="wall wall-floor"></div><div class="wall wall-ceil"></div>';
     var num = section.querySelector('.chamber-num');
     stage.firstChild.setAttribute('data-num', num ? num.textContent : '00');
+    // restless wall: a few tiles of the back wall slide in and out on their own
+    var tiles = '';
+    [[0, 1], [2, 0], [5, 2], [7, 1], [9, 3], [3, 4], [10, 0]].forEach(function (cell, i) {
+      tiles += '<i class="move-tile" style="left:' + cell[0] * 120 + 'px;top:' + cell[1] * 120 + 'px;animation-delay:' + (i * -1.7) + 's"></i>';
+    });
+    stage.firstChild.insertAdjacentHTML('beforeend', tiles);
     section.insertBefore(stage, section.firstChild);
   });
 
@@ -306,48 +312,261 @@
   });
 
   // ---------- Puzzles ----------
+  // Each level has a real puzzle: set things up, press the action button
+  // (or E), watch what happens. A wrong setup fails with a hint and can be
+  // retried; the level menu always lets you skip.
   function finish(scene) {
     var section = scene.closest('.chamber');
     var exit = scene.querySelector('.exit-btn');
+    scene.classList.remove('is-busy');
     scene.classList.add('is-cleared');
     exit.setAttribute('aria-label', 'Porte ouverte : passer au niveau suivant');
     navLinks.forEach(function (link) {
       if (link.getAttribute('href') === '#' + section.id) link.classList.add('is-solved');
     });
     var num = section.querySelector('.chamber-num');
-    say('Niveau ' + (num ? num.textContent : '') + ' terminé. La porte de sortie est ouverte.');
+    var text = 'Niveau ' + (num ? num.textContent : '') + ' terminé. La porte de sortie est ouverte.';
+    scene.querySelector('.puzzle-hint').textContent = text;
+    say(text);
     exit.focus({ preventScroll: true });
   }
 
-  // Launch plate: the cube follows the dotted trajectory.
-  function launchCube(scene, done) {
-    var cube = scene.querySelector('.level-cube-ledge');
-    var svg = scene.querySelector('.launch-arc');
-    var path = svg.querySelector('path');
-    if (!cube.animate || !path.getPointAtLength || reduceMotion.matches) { done(); return; }
-    var box = svg.getBoundingClientRect();
-    var end = cube.getBoundingClientRect();
-    var length = path.getTotalLength();
-    var frames = [];
-    for (var i = 0; i <= 24; i++) {
-      var pt = path.getPointAtLength(length * i / 24);
-      var x = box.left + pt.x * box.width / 400 - (end.left + end.width / 2);
-      var y = box.top + pt.y * box.height / 120 - end.bottom;
-      frames.push({ transform: 'translate(' + x + 'px,' + y + 'px) rotate(' + (i * 15) + 'deg)', opacity: 1 });
-    }
-    frames.push({ transform: 'none', opacity: 1 });
-    cube.animate(frames, { duration: 900, easing: 'cubic-bezier(.3,.1,.6,1)' }).onfinish = function () {
-      scene.classList.add('is-cleared');
-      done();
-    };
+  function add(scene, html) {
+    scene.querySelector('.scene-decor').insertAdjacentHTML('beforeend', html);
   }
 
-  var solvers = { formation: launchCube };
+  // Keyframes are [offset, x, y, scale] in px from the element's CSS position.
+  function animate(el, frames, ms, done) {
+    if (!el.animate || reduceMotion.matches) { done(); return; }
+    var keys = frames.map(function (f) {
+      return {
+        offset: f[0],
+        transform: 'translate(' + f[1] + 'px,' + f[2] + 'px) scale(' + (f[3] == null ? 1 : f[3]) + ')'
+      };
+    });
+    el.animate(keys, { duration: ms, easing: 'linear' }).onfinish = done;
+  }
+
+  // The portal gun: click a white surface to put a portal on it, blue
+  // first, then orange, then blue again... Two portals are always linked.
+  function portalGun(scene, surfaces) {
+    var gun = { blue: null, orange: null, next: 'blue' };
+    var buttons = {};
+    function render() {
+      Object.keys(buttons).forEach(function (id) {
+        var color = gun.blue === id ? 'blue' : gun.orange === id ? 'orange' : '';
+        buttons[id].setAttribute('data-portal', color);
+        buttons[id].setAttribute('aria-label', buttons[id].getAttribute('data-name') +
+          (color ? ' : portail ' + (color === 'blue' ? 'bleu' : 'orange') + ' posé' : ' : poser le portail ' + (gun.next === 'blue' ? 'bleu' : 'orange')));
+      });
+      scene.setAttribute('data-next', gun.next);
+    }
+    surfaces.forEach(function (surface) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'surf surf-' + surface[0];
+      button.setAttribute('data-name', surface[1]);
+      button.addEventListener('click', function () {
+        if (scene.classList.contains('is-cleared') || scene.classList.contains('is-busy')) return;
+        var other = gun.next === 'blue' ? 'orange' : 'blue';
+        if (gun[other] === surface[0]) gun[other] = null;
+        gun[gun.next] = surface[0];
+        gun.next = other;
+        render();
+      });
+      buttons[surface[0]] = button;
+      scene.appendChild(button);
+    });
+    gun.linked = function (a, b) {
+      return (gun.blue === a && gun.orange === b) || (gun.blue === b && gun.orange === a);
+    };
+    gun.has = function (id) { return gun.blue === id || gun.orange === id; };
+    render();
+    return gun;
+  }
+
+  var puzzles = {};
+
+  // 01 — the cube must land on the button behind the glass: one portal
+  // under the dropper, the other on the ceiling above the button.
+  puzzles.competences = {
+    hint: 'Objectif : le cube sur le bouton rouge. Posez deux portails sur les surfaces blanches (bleu, puis orange), puis lâchez le cube.',
+    init: function (scene) {
+      add(scene, '<span class="glass"></span>');
+      this.gun = portalGun(scene, [['drop', 'Sol, sous le distributeur'], ['side', 'Sol, derrière la vitre'], ['top', 'Plafond, au-dessus du bouton']]);
+    },
+    act: function (scene, win, fail) {
+      var gun = this.gun;
+      var cube = scene.querySelector('.level-cube');
+      var w = scene.clientWidth, h = scene.clientHeight;
+      var floor = h - 50, dx = w * .42;
+      if (gun.linked('drop', 'top')) {
+        animate(cube, [[0, 0, 0], [.3, 0, floor], [.36, 0, floor + 20, 0], [.37, dx, -30, 0], [.45, dx, 0], [1, dx, floor - 12]], 1300, win);
+      } else if (gun.linked('drop', 'side')) {
+        animate(cube, [[0, 0, 0], [.3, 0, floor], [.36, 0, floor + 20, 0], [.37, w * .26, floor + 20, 0], [.55, w * .26, floor - 50], [.8, w * .26, floor], [1, w * .26, floor]], 1400,
+          function () { fail('Le cube ressort du sol, du mauvais côté de la vitre. Le bouton est sous le plafond de droite.'); });
+      } else {
+        animate(cube, [[0, 0, 0], [.4, 0, floor], [.55, 0, floor - 14], [.7, 0, floor], [1, 0, floor]], 1100, function () {
+          fail(gun.has('drop') ? 'Un portail seul ne mène nulle part : il en faut un second, là où le cube doit ressortir.'
+            : 'Le cube tombe au sol, loin du bouton. Il faut un portail sous le distributeur.');
+        });
+      }
+    }
+  };
+
+  // 02 — the light bridge hits a wall. Catch it with a portal and let it
+  // out at the edge of the pit.
+  puzzles.experiences = {
+    hint: 'Objectif : franchir la fosse. Posez un portail là où le pont de lumière frappe le mur, l’autre au bord de la fosse, puis activez le pont.',
+    init: function (scene) {
+      add(scene, '<span class="bridge-a"></span><span class="bridge-c"></span>');
+      this.gun = portalGun(scene, [['hit', 'Mur frappé par le pont'], ['edge', 'Mur au bord de la fosse'], ['roof', 'Plafond, au-dessus de la fosse']]);
+    },
+    act: function (scene, win, fail) {
+      var gun = this.gun;
+      scene.classList.add('is-firing');
+      setTimeout(function () {
+        if (gun.linked('hit', 'edge')) {
+          scene.classList.add('is-bridged');
+          setTimeout(win, reduceMotion.matches ? 0 : 650);
+          return;
+        }
+        if (gun.linked('hit', 'roof')) scene.classList.add('is-dropping');
+        setTimeout(function () {
+          scene.classList.remove('is-firing', 'is-dropping');
+          fail(gun.linked('hit', 'roof') ? 'Le pont ressort du plafond et tombe dans la fosse : inutilisable. Il doit sortir à l’horizontale.'
+            : 'Le pont s’écrase contre le mur. Il lui faut une entrée là où il frappe, et une sortie.');
+        }, 900);
+      }, reduceMotion.matches ? 0 : 450);
+    }
+  };
+
+  // 03 — aim the laser (see the pointer tracking above); E fires it for you.
+  puzzles.projets = {
+    hint: 'Objectif : toucher le récepteur. Le laser suit votre pointeur : maintenez le faisceau sur le récepteur (ou touche E).',
+    act: function (scene, win) {
+      scene.classList.add('is-cleared');
+      setTimeout(win, reduceMotion.matches ? 0 : 500);
+    }
+  };
+
+  // 04 — launch plate: the power needle swings, launch in the green zone.
+  puzzles.formation = {
+    hint: 'Objectif : le cube sur la plateforme. Lancez quand l’aiguille de puissance est dans la zone verte.',
+    init: function (scene) {
+      add(scene, '<span class="power-gauge"><span class="power-zone"></span><span class="power-needle"></span></span>');
+    },
+    act: function (scene, win, fail) {
+      var cube = scene.querySelector('.level-cube-ledge');
+      var svg = scene.querySelector('.launch-arc');
+      var path = svg.querySelector('path');
+      var gauge = scene.querySelector('.power-gauge');
+      var needle = gauge.querySelector('.power-needle');
+      var power = reduceMotion.matches ? .7 : parseFloat(getComputedStyle(needle).left) / gauge.clientWidth;
+      var good = power >= .58 && power <= .82;
+      if (!cube.animate || reduceMotion.matches) { if (good) win(); return; }
+      needle.style.animationPlayState = 'paused';
+      // scene-local geometry: screen boxes divided by the 3D scale of the scene
+      var frame = scene.getBoundingClientRect();
+      var k = frame.width / scene.clientWidth;
+      function local(el) {
+        var r = el.getBoundingClientRect();
+        return { x: (r.left - frame.left) / k, y: (r.top - frame.top) / k, w: r.width / k, h: r.height / k };
+      }
+      var arc = local(svg), from = local(cube), ledge = local(scene.querySelector('.ledge'));
+      var startX = from.x + from.w / 2, startY = from.y + from.h;
+      var reach = good ? 1 : power / .7;
+      var length = path.getTotalLength();
+      var frames = [], last;
+      for (var i = 0; i <= 24; i++) {
+        var pt = path.getPointAtLength(length * i / 24);
+        var x = arc.x + pt.x * arc.w / 400 * reach;
+        var y = arc.y + pt.y * arc.h / 120;
+        if (!good && i > 12) y += (scene.clientHeight - 8 - y) * (i - 12) / 12; // miss: it ends on the floor
+        last = [i / 26, x - startX, y - startY];
+        frames.push(last);
+      }
+      if (good) last = [1, ledge.x + ledge.w / 2 - startX, ledge.y - startY];
+      frames.push([1, last[1], last[2]]);
+      cube.style.opacity = 1;
+      animate(cube, frames, 1000, function () {
+        cube.style.opacity = '';
+        needle.style.animationPlayState = '';
+        if (good) win();
+        else fail(power < .58 ? 'Trop court : le cube retombe avant la plateforme. Attendez que l’aiguille soit dans le vert.'
+          : 'Trop fort : le cube passe au-dessus de la plateforme. Visez la zone verte.');
+      });
+    }
+  };
+
+  // 05 — gels: orange speeds the cube up, blue makes it bounce. It needs
+  // speed first, then a bounce, to clear the pit and reach the button.
+  puzzles.profil = {
+    hint: 'Objectif : le cube sur le bouton, de l’autre côté de la fosse. Cliquez les dalles pour changer de gel : l’orange accélère, le bleu fait rebondir.',
+    init: function (scene) {
+      add(scene, '<span class="pit gel-pit"></span><span class="floor-button gel-target"></span>' +
+        '<span class="level-cube gel-cube"><span class="cube3d"><span class="cube-face cube-front"></span>' +
+        '<span class="cube-face cube-right"></span><span class="cube-face cube-top"></span></span></span>');
+      var names = { none: 'sans gel', orange: 'gel orange (accélère)', blue: 'gel bleu (rebond)' };
+      var order = ['none', 'orange', 'blue'];
+      this.tiles = [1, 2].map(function (n) {
+        var tile = document.createElement('button');
+        tile.type = 'button';
+        tile.className = 'tile tile-' + n;
+        function set(gel) {
+          tile.setAttribute('data-gel', gel);
+          tile.setAttribute('aria-label', 'Dalle ' + n + ' : ' + names[gel] + '. Cliquer pour changer.');
+        }
+        set('none');
+        tile.addEventListener('click', function () {
+          if (scene.classList.contains('is-cleared') || scene.classList.contains('is-busy')) return;
+          set(order[(order.indexOf(tile.getAttribute('data-gel')) + 1) % 3]);
+        });
+        scene.appendChild(tile);
+        return tile;
+      });
+    },
+    act: function (scene, win, fail) {
+      var first = this.tiles[0].getAttribute('data-gel');
+      var second = this.tiles[1].getAttribute('data-gel');
+      var cube = scene.querySelector('.gel-cube');
+      var w = scene.clientWidth, h = scene.clientHeight;
+      var t1 = w * .14, t2 = w * .36, pit = w * .5, target = w * .64;
+      if (first === 'blue') {
+        animate(cube, [[0, 0, 0], [.3, t1, 0], [.5, t1 + 10, -h * .5], [.7, t1, 0], [.85, t1, -h * .2], [1, t1, 0]], 1300,
+          function () { fail('Le gel bleu fait rebondir sur place : sans élan, le cube ne va nulle part. Il faut d’abord de la vitesse.'); });
+      } else if (first !== 'orange') {
+        if (second === 'blue') {
+          animate(cube, [[0, 0, 0], [.55, t2, 0], [.75, pit, -h * .35], [1, pit + 14, h * .5, .6]], 1700,
+            function () { fail('Un rebond sans élan retombe dans la fosse. Accélérez d’abord avec le gel orange.'); });
+        } else {
+          animate(cube, [[0, 0, 0], [.8, pit - 30, 0], [1, pit - 30, 0]], 1800,
+            function () { fail('Trop lent : le cube s’arrête avant la fosse. Le gel orange donne de la vitesse.'); });
+        }
+      } else if (second !== 'blue') {
+        animate(cube, [[0, 0, 0], [.2, t1, 0], [.6, pit, 0], [1, pit + 30, h * .6, .6]], 900,
+          function () { fail('Rapide, mais sans rebond : le cube file droit dans la fosse. Le gel bleu, juste avant le bord, le fera sauter.'); });
+      } else {
+        animate(cube, [[0, 0, 0], [.2, t1, 0], [.45, t2 + 20, 0], [.7, (t2 + target) / 2 + 10, -h * .62], [1, target, -6]], 1100, win);
+      }
+    }
+  };
 
   Array.prototype.forEach.call(document.querySelectorAll('.level-scene'), function (scene) {
     var section = scene.closest('.chamber');
     var trigger = scene.querySelector('.puzzle-btn');
     var exit = scene.querySelector('.exit-btn');
+    var puzzle = puzzles[section.id];
+    var fails = 0;
+
+    // the objective, then the result of each try (read by screen readers too)
+    var hint = document.createElement('p');
+    hint.className = 'puzzle-hint';
+    hint.setAttribute('role', 'status');
+    hint.textContent = puzzle.hint;
+    scene.insertBefore(hint, scene.firstChild);
+    if (puzzle.init) puzzle.init(scene);
+
     trigger.hidden = false;
     exit.hidden = false;
     exit.setAttribute('aria-label', 'Porte verrouillée : résolvez l’énigme pour l’ouvrir');
@@ -355,12 +574,13 @@
     trigger.addEventListener('click', function () {
       if (scene.classList.contains('is-cleared') || scene.classList.contains('is-busy')) return;
       scene.classList.add('is-busy');
-      function done() { scene.classList.remove('is-busy'); finish(scene); }
-      var solver = solvers[section.id];
-      if (solver) { solver(scene, done); return; }
-      // CSS transitions play the solution; open the door once they are done
-      scene.classList.add('is-cleared');
-      setTimeout(done, reduceMotion.matches ? 0 : 550);
+      puzzle.act(scene, function () { finish(scene); }, function (message) {
+        fails++;
+        scene.classList.remove('is-busy');
+        if (fails >= 3) message += ' (Le menu des niveaux permet aussi de passer.)';
+        hint.textContent = message;
+        say(message);
+      });
     });
 
     exit.addEventListener('click', function (event) {
