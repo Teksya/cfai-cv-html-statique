@@ -70,7 +70,7 @@
     root.style.setProperty('--header-h', sticky ? header.offsetHeight + 'px' : '0px');
   }
   window.addEventListener('resize', syncHeaderHeight);
-  setClassic(/[?&]classique/.test(location.search) || readPref());
+  setClassic(/[?&]classique\b/.test(location.search) || readPref());
 
   // Scroll progress across the whole test.
   var ticking = false;
