@@ -68,6 +68,7 @@
     root.classList.toggle('at-end', index === chambers.length - 1);
     var room = section.querySelector('.room');
     if (room) room.scrollTop = 0;
+    if (isGame()) window.scrollTo(0, 0); // focus or scroll restoration must not shift the screen
     say(section.getAttribute('data-annonce'));
     syncSvgMotion();
     if (moveFocus) {
@@ -236,6 +237,7 @@
     if (toggle) {
       toggle.setAttribute('aria-pressed', String(on));
       toggleLabel.textContent = on ? 'Revenir au mode jeu' : 'Afficher le CV classique';
+      toggle.title = toggleLabel.textContent;
     }
     if (narrator) narrator.classList.add('is-hidden');
     syncHeaderHeight();
@@ -246,6 +248,7 @@
     } else {
       var index = current < 0 ? 0 : current;
       current = -1;
+      window.scrollTo(0, 0); // the game screen never scrolls
       activate(index, false);
     }
     syncSvgMotion();
@@ -273,6 +276,7 @@
     root.classList.add('game');
   });
 
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   current = indexFromHash();
   setClassic(/[?&]classique\b/.test(location.search) || readPref());
 })();

@@ -36,17 +36,6 @@
 <body>
   <a class="skip-link" href="#contenu">Aller au contenu</a>
 
-  <div class="view-tools">
-    <button type="button" class="tool-btn" id="toggle-classic" aria-pressed="false" hidden>
-      <svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg>
-      <span class="tool-label">Afficher le CV classique</span>
-    </button>
-    <a class="tool-btn" href="cv-olivier-dutoit.pdf" type="application/pdf" download>
-      <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
-      <span>Exporter en PDF</span>
-    </a>
-  </div>
-
   <svg class="sprite" aria-hidden="true" focusable="false">
     <!-- portal rim: noise-displaced ring of light, bloomed twice -->
     <filter id="f-rim" x="-40%" y="-25%" width="180%" height="150%" color-interpolation-filters="sRGB">
@@ -88,10 +77,22 @@
 
   <header class="site-header">
     <div class="header-inner">
+      <div class="view-tools">
+        <button type="button" class="tool-btn" id="toggle-classic" aria-pressed="false" title="Afficher le CV classique" hidden>
+          <svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg>
+          <span class="tool-text tool-label">Afficher le CV classique</span>
+        </button>
+        <a class="tool-btn" href="cv-olivier-dutoit.pdf" type="application/pdf" download title="Exporter le CV en PDF">
+          <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+          <span class="tool-text">Exporter en PDF</span>
+        </a>
+      </div>
       <a class="brand" href="#accueil">
         <span class="brand-mark" aria-hidden="true"><span></span><span></span></span>
-        <span class="brand-name">Olivier Dutoit</span>
-        <span class="brand-sub">programme de test</span>
+        <span class="brand-text">
+          <span class="brand-name">Olivier Dutoit</span>
+          <span class="brand-sub">Sujet de test · alternant SISR</span>
+        </span>
       </a>
       <nav class="site-nav" aria-label="Chambres du CV">
         <ol class="nav-list">
@@ -133,7 +134,7 @@
           <span class="portal portal-blue"><span class="portal-view"></span><svg class="portal-rim" viewBox="0 0 140 240"><use href="#portal-rim"/></svg></span>
           <span class="portal portal-orange"><span class="portal-view"></span><svg class="portal-rim" viewBox="0 0 140 240"><use href="#portal-rim"/></svg></span>
           <span class="scene-floor"></span>
-          <span class="hero-cube"><svg class="icon"><use href="#i-cube"/></svg></span>
+          <span class="hero-cube"><span class="cube3d"><span class="cube-face cube-front"></span><span class="cube-face cube-right"></span><span class="cube-face cube-top"></span></span></span>
         </div>
       </div>
     </section>
@@ -215,7 +216,7 @@
         <div class="level-scene level-competences">
           <div class="scene-decor" aria-hidden="true">
             <span class="dropper"></span>
-            <span class="level-cube"><svg class="icon"><use href="#i-cube"/></svg></span>
+            <span class="level-cube"><span class="cube3d"><span class="cube-face cube-front"></span><span class="cube-face cube-right"></span><span class="cube-face cube-top"></span></span></span>
             <span class="floor-button"></span>
             <span class="wire"></span>
             <span class="exit">
@@ -438,7 +439,7 @@
             <span class="launch-plate"></span>
             <svg class="launch-arc" viewBox="0 0 400 120" preserveAspectRatio="none"><path d="M10 115 Q 190 -40 380 60"/></svg>
             <span class="ledge"></span>
-            <span class="level-cube level-cube-ledge"><svg class="icon"><use href="#i-cube"/></svg></span>
+            <span class="level-cube level-cube-ledge"><span class="cube3d"><span class="cube-face cube-front"></span><span class="cube-face cube-right"></span><span class="cube-face cube-top"></span></span></span>
             <span class="wire"></span>
             <span class="exit">
               <span class="exit-sign"><svg class="icon"><use href="#i-check"/></svg></span>
@@ -519,7 +520,7 @@
         <span class="stars stars-far"></span>
         <span class="stars stars-near"></span>
         <span class="earth"></span>
-        <span class="drift-cube"><svg class="icon"><use href="#i-cube"/></svg></span>
+        <span class="drift-cube"><span class="cube3d"><span class="cube-face cube-front"></span><span class="cube-face cube-right"></span><span class="cube-face cube-top"></span></span></span>
         <svg class="moon-ground" viewBox="0 0 1200 220" preserveAspectRatio="none">
           <defs>
             <linearGradient id="g-ground" x1="0" y1="0" x2="0" y2="1">
@@ -565,9 +566,23 @@
   </main>
 
   <footer class="site-footer">
-    <p>© <time datetime="2026">2026</time> Olivier Dutoit · CV en HTML et CSS statiques, sans dépendance externe.</p>
-    <p>Direction artistique en hommage aux jeux de puzzle à portails de Valve ; projet personnel non affilié.</p>
-    <p><a href="#accueil">Retour à l'ascenseur (haut de page)</a></p>
+    <div class="footer-inner">
+      <div class="footer-id">
+        <p class="footer-name"><span class="brand-mark" aria-hidden="true"><span></span><span></span></span> Olivier Dutoit</p>
+        <p>Alternant BTS SIO SISR · Saint-Étienne</p>
+      </div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/Teksya" target="_blank" rel="noopener noreferrer">Profil GitHub<span class="vh"> (nouvel onglet)</span></a></li>
+        <li><a href="https://www.linkedin.com/in/olivier-dutoit" target="_blank" rel="noopener noreferrer">Profil LinkedIn<span class="vh"> (nouvel onglet)</span></a></li>
+        <li><a href="https://www.olivier-dutoit.fr" target="_blank" rel="noopener noreferrer">Portfolio<span class="vh"> (nouvel onglet)</span></a></li>
+        <li><a href="cv-olivier-dutoit.pdf" type="application/pdf" download>CV en PDF</a></li>
+      </ul>
+      <div class="footer-meta">
+        <p>© <time datetime="2026">2026</time> · HTML et CSS statiques, sans dépendance externe.</p>
+        <p>Hommage aux jeux de puzzle à portails de Valve ; projet personnel non affilié.</p>
+        <p><a href="#accueil">Retour à l'ascenseur (début du CV)</a></p>
+      </div>
+    </div>
   </footer>
 
   <p class="narrator" aria-hidden="true"><span class="narrator-eye"></span><span class="narrator-text"></span></p>

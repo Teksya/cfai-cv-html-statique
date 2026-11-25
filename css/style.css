@@ -41,9 +41,10 @@
   --tile: 96px;
   --shadow: 0 1px 2px rgba(0, 0, 0, .08), 0 8px 22px rgba(20, 30, 40, .12);
   --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Noto Sans", "DejaVu Sans", Arial, sans-serif;
-  --header-h: 0px;
+  --header-h: 112px; /* sticky header, refined by app.js */
   color-scheme: light;
 }
+@media (min-width: 900px) { :root { --header-h: 64px; } }
 
 /* dark theme: the old, unlit wing of the facility */
 @media (prefers-color-scheme: dark) {
@@ -135,40 +136,45 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
 
 .muted { color: var(--ink-muted); }
 
-/* ---------- View tools (fixed, top left) ---------- */
-.view-tools {
-  position: fixed; top: 8px; left: 8px; z-index: 60;
-  display: flex; gap: 6px;
-}
-.tool-btn {
-  display: inline-flex; align-items: center; gap: 6px; min-height: 40px;
-  padding: 6px 12px; border-radius: var(--radius);
-  font: 600 .9375rem/1.2 var(--font); text-decoration: none; cursor: pointer;
-  background: #f7f9fa; color: #1d2226; border: 1px solid #000;
-  box-shadow: 0 0 0 2px rgba(39, 167, 255, .55), 0 4px 12px rgba(0, 0, 0, .3);
-}
-@media (max-width: 639px) {
-  .tool-btn { padding: 6px 9px; font-size: .8125rem; white-space: nowrap; }
-}
-.tool-btn:hover { background: #dff1ff; }
-.tool-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 5px var(--btn-blue); }
-.tool-btn[aria-pressed="true"] { background: var(--btn-blue); color: #fff; border-color: var(--btn-blue); }
-
-/* ---------- Header ---------- */
+/* ---------- Header: facility HUD ----------
+   Tools (classic view, PDF) at the far left, subject badge, then the
+   level selector whose segments light up blue (current) and orange (solved). */
 .site-header {
-  position: relative; z-index: 20;
-  background: linear-gradient(#2d3338, var(--strip));
+  position: sticky; top: 0; z-index: 40;
   color: var(--strip-ink);
-  border-bottom: 3px solid #000;
-  padding-top: 52px; /* leaves room for the fixed view tools */
+  background:
+    linear-gradient(rgba(255, 255, 255, .07), transparent 45%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .02) 0 2px, transparent 2px 5px),
+    linear-gradient(#30363b, #1a1e21);
+  border-bottom: 1px solid #000;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .06), 0 6px 18px rgba(0, 0, 0, .25);
 }
 .header-inner {
-  max-width: 1160px; margin: 0 auto; padding: 10px 16px;
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px;
+  max-width: 1400px; margin: 0 auto; padding: 8px 12px 4px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px;
 }
+
+.view-tools { display: flex; gap: 6px; }
+.tool-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-width: 44px; min-height: 44px; padding: 6px 10px; border-radius: var(--radius);
+  font: 600 .9375rem/1.2 var(--font); text-decoration: none; cursor: pointer;
+  background: rgba(255, 255, 255, .07); color: var(--strip-ink);
+  border: 1px solid rgba(255, 255, 255, .2);
+}
+.tool-btn:hover { background: rgba(39, 167, 255, .2); border-color: var(--portal-blue); }
+.tool-btn[aria-pressed="true"] { background: var(--btn-blue); border-color: var(--btn-blue); color: #fff; }
+.tool-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 4px var(--btn-blue); }
+/* labels stay for screen readers, shown on wide screens */
+.tool-text {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
 .brand {
-  display: inline-flex; align-items: center; gap: 10px;
-  color: inherit; text-decoration: none; font-weight: 700; letter-spacing: .02em;
+  display: inline-flex; align-items: center; gap: 10px; min-height: 44px;
+  padding-left: 14px; border-left: 1px solid rgba(255, 255, 255, .15);
+  color: inherit; text-decoration: none;
 }
 .brand-mark { display: inline-flex; gap: 3px; }
 .brand-mark span {
@@ -176,19 +182,32 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
   border: 3px solid var(--portal-blue); box-shadow: 0 0 6px var(--portal-blue);
 }
 .brand-mark span + span { border-color: var(--portal-orange); box-shadow: 0 0 6px var(--portal-orange); }
+.brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.brand-name { font-weight: 700; letter-spacing: .02em; }
 .brand-sub {
-  font-weight: 400; font-size: .875rem; color: var(--strip-muted);
+  font-size: .8125rem; color: var(--strip-muted);
   text-transform: uppercase; letter-spacing: .12em;
 }
 
 .site-nav { width: 100%; }
-.nav-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
-.nav-list a {
-  display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 10px;
-  border-radius: var(--radius); color: var(--strip-ink); text-decoration: none;
+.nav-list {
+  display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none;
 }
-.nav-list a:hover { background: rgba(255, 255, 255, .08); }
-.nav-list a[aria-current="true"] { box-shadow: inset 0 -3px 0 var(--portal-orange); }
+.nav-list li { flex: 1 0 auto; }
+.nav-list a {
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 6px 10px 12px; white-space: nowrap;
+  border-radius: var(--radius) var(--radius) 0 0; color: var(--strip-ink); text-decoration: none;
+}
+/* level segment */
+.nav-list a::after {
+  content: ""; position: absolute; left: 6px; right: 6px; bottom: 4px; height: 3px; border-radius: 2px;
+  background: rgba(255, 255, 255, .16);
+}
+.nav-list a:hover { background: rgba(255, 255, 255, .07); }
+.nav-list a[aria-current] { background: rgba(39, 167, 255, .14); }
+.nav-list a[aria-current]::after { background: var(--portal-blue); box-shadow: 0 0 8px var(--portal-blue); }
+.nav-list a.is-solved::after { background: var(--portal-orange); box-shadow: 0 0 6px var(--portal-orange); }
 .nav-num {
   font-variant-numeric: tabular-nums; font-size: .8125rem; font-weight: 700;
   color: var(--strip-muted); border: 1px solid #4a5258; border-radius: 3px; padding: 0 5px;
@@ -379,13 +398,54 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
   box-shadow: 0 -3px 0 #000, 0 -14px 24px -10px rgba(0, 0, 0, .35);
 }
 .hero-cube {
-  position: absolute; z-index: 3; left: 50%; bottom: 26px; margin-left: -30px;
-  width: 60px; height: 60px; display: grid; place-items: center;
-  background: linear-gradient(135deg, #f4f6f7, #b8c0c6); color: #3a4248;
-  border: 2px solid #6b747b; border-radius: 8px;
-  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, .5), 0 10px 14px -6px rgba(0, 0, 0, .45);
+  position: absolute; z-index: 3; left: 50%; bottom: 26px; margin-left: -36px;
+  width: 72px; height: 72px; perspective: 600px;
 }
-.hero-cube .icon { width: 32px; height: 32px; }
+.hero-cube .cube3d { --s: 50px; }
+/* contact shadow on the floor */
+.hero-cube::after, .level-cube::after {
+  content: ""; position: absolute; left: 12%; right: 12%; bottom: -3px; height: 8px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, .45), transparent);
+}
+
+/* ---------- Weighted cube (3D, CSS only) ----------
+   A real cube: three visible faces in 3D, corner bumpers, panel seams
+   and a lit lens. Original emblem, no copy of a game's cube art. */
+.cube3d {
+  --s: 40px;
+  position: absolute; left: 50%; top: 50%;
+  width: var(--s); height: var(--s); margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  transform-style: preserve-3d; transform: rotateX(-24deg) rotateY(-40deg);
+  transition: transform .6s cubic-bezier(.3, .7, .3, 1);
+}
+.cube-face {
+  --face: #c4cacf; --bumper: #4f575d; --lens: #ffd08a; --lens-ring: #ff9d2e;
+  position: absolute; inset: 0; border-radius: 16%;
+  background:
+    radial-gradient(circle, var(--lens) 0 8%, #fff 9% 12%, var(--lens-ring) 13% 18%, transparent 19%),
+    radial-gradient(circle, #eceff1 0 25%, #7d868c 26% 29%, transparent 30%),
+    linear-gradient(var(--bumper), var(--bumper)) 0 0 / 31% 31% no-repeat,
+    linear-gradient(var(--bumper), var(--bumper)) 100% 0 / 31% 31% no-repeat,
+    linear-gradient(var(--bumper), var(--bumper)) 0 100% / 31% 31% no-repeat,
+    linear-gradient(var(--bumper), var(--bumper)) 100% 100% / 31% 31% no-repeat,
+    linear-gradient(90deg, transparent 48.5%, rgba(0, 0, 0, .22) 48.5% 51.5%, transparent 51.5%),
+    linear-gradient(transparent 48.5%, rgba(0, 0, 0, .22) 48.5% 51.5%, transparent 51.5%),
+    linear-gradient(135deg, rgba(255, 255, 255, .35), transparent 60%),
+    var(--face);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, .45),
+    inset 0 0 0 calc(var(--s) * .04) rgba(255, 255, 255, .18),
+    inset 0 0 calc(var(--s) * .18) rgba(0, 0, 0, .28);
+}
+.cube-front { transform: translateZ(calc(var(--s) / 2)); }
+.cube-right { --face: #98a1a7; --bumper: #3a4146; transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); }
+.cube-top { --face: #e4e8eb; --bumper: #6a737a; transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); }
+/* light on the lens: the cube is "on" */
+.cube-front::after, .cube-right::after, .cube-top::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 40%; height: 40%; margin: -20% 0 0 -20%;
+  border-radius: 50%; background: radial-gradient(circle, rgba(255, 170, 70, .55), transparent 70%);
+}
+.hero-cube:hover .cube3d { transform: rotateX(-24deg) rotateY(-130deg); }
 
 /* ---------- Portals ----------
    Built like the real thing: a view of the other side, a flaming rim
@@ -520,14 +580,10 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
     0 0 24px rgba(110, 170, 255, .5);
 }
 .drift-cube {
-  position: absolute; top: 46%; left: 6%;
-  width: 34px; height: 34px; display: grid; place-items: center;
-  background: linear-gradient(135deg, #e9edf0, #8d969d); color: #3a4248;
-  border-radius: 5px; opacity: .85;
-  box-shadow: inset -6px -6px 10px rgba(0, 0, 0, .45);
+  position: absolute; top: 46%; left: 6%; width: 44px; height: 44px;
   animation: drift 18s ease-in-out infinite alternate;
 }
-.drift-cube .icon { width: 20px; height: 20px; }
+.drift-cube .cube3d { --s: 30px; filter: brightness(.8); }
 @keyframes drift {
   from { transform: translate(0, 0) rotate(-12deg); }
   to { transform: translate(40px, -30px) rotate(28deg); }
@@ -553,21 +609,38 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
 .space .chamber-inner { z-index: 2; }
 .space-lead { font-size: 1.125rem; max-width: 60ch; }
 
-/* ---------- Footer ---------- */
+/* ---------- Footer: end credits plate ---------- */
 .site-footer {
-  background: #45494f; color: #fff;
-  padding: 20px 16px 28px; text-align: center;
+  color: var(--strip-ink);
+  background:
+    linear-gradient(rgba(255, 255, 255, .06), transparent 30%),
+    linear-gradient(#262b2f, #15181a);
+  border-top: 3px solid #000;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
 }
-.site-footer p + p { margin-top: 4px; }
-.site-footer a { color: #fff; }
-.site-footer :focus-visible { outline-color: #fff; box-shadow: 0 0 0 4px #000; }
+.footer-inner {
+  max-width: 1160px; margin: 0 auto; padding: 22px 16px 26px;
+  display: grid; gap: 18px;
+}
+.footer-name { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.125rem; }
+.footer-id p + p { color: var(--strip-muted); margin-top: 2px; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.footer-links a {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, .2); border-radius: var(--radius);
+  color: var(--strip-ink); text-decoration: none; font-weight: 600;
+}
+.footer-links a:hover { border-color: var(--portal-orange); background: rgba(255, 157, 46, .12); }
+.footer-meta { color: var(--strip-muted); }
+.footer-meta p + p { margin-top: 4px; }
+.footer-meta a { color: #fff; }
+.site-footer :focus-visible { outline-color: #fff; box-shadow: 0 0 0 4px var(--btn-blue); }
 
 /* narrator lives only in the JS layer */
 .narrator { display: none; }
 
 /* ---------- Breakpoints ---------- */
 @media (min-width: 640px) {
-  .nav-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .portal { width: 120px; height: 206px; }
@@ -577,7 +650,10 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
 @media (min-width: 900px) {
   .chamber { padding: 84px 0 80px; }
   .site-nav { width: auto; margin-left: auto; }
-  .nav-list { display: flex; gap: 2px; }
+  .nav-list li { flex: none; }
+  .footer-inner { grid-template-columns: 1fr auto; align-items: center; }
+  .footer-meta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 24px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .12); }
+  .footer-meta p + p { margin-top: 0; }
   .hero-grid { grid-template-columns: 1.25fr 1fr; }
   .hero-scene { min-height: 400px; }
   .hero-scene .portal { width: 140px; height: 240px; }
@@ -588,19 +664,19 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
   .earth { width: 160px; height: 160px; top: 120px; }
 }
 
-/* wide screens: the fixed tools fit on the same line as the header */
-@media (min-width: 1360px) {
-  .site-header { padding-top: 0; }
-  .header-inner { max-width: none; padding-left: 400px; }
-}
-
-@media (min-width: 900px) and (max-width: 1100px) {
+/* phones: tools and name share one row */
+@media (max-width: 639px) {
   .brand-sub { display: none; }
+}
+@media (min-width: 900px) and (max-width: 1199px) {
+  .brand-text { display: none; }
+}
+@media (min-width: 1360px) {
+  .tool-text { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
 }
 
 /* ---------- JS layer (progressive enhancement) ---------- */
 @media (min-width: 900px) {
-  .js .site-header { position: sticky; top: 0; }
   .js .narrator {
     display: flex; align-items: center; gap: 12px;
     position: fixed; left: 16px; bottom: 16px; z-index: 30;
@@ -691,12 +767,10 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
   background: linear-gradient(90deg, rgba(190, 225, 255, .35), rgba(255, 255, 255, .6) 40%, rgba(190, 225, 255, .25));
 }
 .level-cube {
-  left: 26%; bottom: 16px; width: 46px; height: 46px; display: grid; place-items: center;
-  background: linear-gradient(135deg, #f4f6f7, #aab3ba); color: #3a4248;
-  border: 2px solid #6b747b; border-radius: 7px;
-  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .5), 0 8px 10px -6px rgba(0, 0, 0, .5);
+  left: 26%; bottom: 14px; width: 46px; height: 46px;
   transition: transform .55s cubic-bezier(.55, 0, .9, .4), opacity .3s;
 }
+.level-cube .cube3d { --s: 32px; }
 .floor-button {
   left: calc(26% - 17px); bottom: 0; width: 80px; height: 14px;
   background: var(--metal); border-radius: 4px 4px 0 0;
@@ -816,7 +890,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
 .game .level-scene:not(.is-cleared) .exit-door span { transform: none; }
 .game .level-scene:not(.is-cleared) .exit-sign { color: #5b636a; box-shadow: none; }
 .game .level-scene:not(.is-cleared) .wire { color: #8b98a3; }
-.game .level-competences:not(.is-cleared) .level-cube { transform: translateY(-92px); }
+.game .level-competences:not(.is-cleared) .level-cube { transform: translateY(-66px); }
 .game .level-competences:not(.is-cleared) .floor-button::before { background: #8a2a20; box-shadow: none; }
 .game .level-experiences:not(.is-cleared) .light-bridge { transform: scaleX(0); }
 .game .level-projets:not(.is-cleared) .laser-beam { transform: rotate(-28deg) scaleX(.5); }
@@ -843,8 +917,10 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
 /* ---------- Game mode (JS, not classic): one level per screen ----------
    No page scroll: the header stays, the active chamber fills the rest of
    the screen, its content scrolls inside .room if it has to. */
+/* clip, not hidden: nothing (focus, scroll restoration) may scroll the screen */
+html.game { overflow: hidden; }
 .game body {
-  height: 100vh; height: 100dvh; overflow: hidden;
+  height: 100vh; height: 100dvh; overflow: hidden; overflow: clip;
   display: flex; flex-direction: column;
 }
 .game .site-header { flex: none; position: relative; }
@@ -865,17 +941,26 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
 }
 .game .level-scene { flex: none; height: 132px; margin: 6px 0 16px; }
 .game .dropper, .game .gel-pipe { top: -4px; }
-.game .hero-grid { overflow-x: hidden; }
+.game .hero .hero-grid { overflow-x: hidden; }
 
 .game .hero .chamber-inner { padding-top: 16px; }
-.game .hero-grid { flex: 1; min-height: 0; overflow-y: auto; align-content: center; }
+/* the arrival room is a grid (text | scene), not the flex column of other levels */
+.game .hero .hero-grid { display: grid; align-content: safe center; overflow-y: auto; padding-bottom: 16px; }
+.game .hero-scene { width: 100%; }
 .game .space .chamber-inner { padding-top: 96px; }
 .game .site-footer { display: none; }
+/* last level: the credits roll in as a translucent strip over the Moon */
 .game.at-end .site-footer {
   display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
-  padding: 8px 16px; background: rgba(30, 33, 36, .88);
+  background: rgba(16, 19, 22, .82); backdrop-filter: blur(6px); border-top-width: 1px;
 }
-.game.at-end .site-footer p:nth-child(2) { display: none; }
+.game.at-end .footer-inner { padding: 10px 16px; gap: 8px; }
+.game.at-end .footer-id, .game.at-end .footer-meta p:nth-child(2) { display: none; }
+.game.at-end .footer-meta { border: 0; padding: 0; }
+@media (max-width: 899px) {
+  /* the contact panel already holds these links on small screens */
+  .game.at-end .footer-links { display: none; }
+}
 
 .game .test-progress { display: block; height: 3px; background: #000; }
 .game .test-progress-bar {
@@ -884,6 +969,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
   transition: width .3s ease-out;
 }
 .nav-list a.is-solved .nav-num { background: var(--portal-orange); color: #1d2226; border-color: var(--portal-orange); }
+.nav-list a[aria-current] .nav-num { color: #fff; border-color: var(--portal-blue); }
 
 /* in-world prompts */
 .puzzle-btn, .exit-btn {
@@ -938,10 +1024,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
 .warp.is-on::before { transform: scale(18); }
 
 @media (max-width: 899px) {
-  .game .header-inner { padding-top: 6px; padding-bottom: 6px; }
-  .game .brand { display: none; }
-  .game .nav-list { display: flex; justify-content: space-between; gap: 4px; }
-  .game .nav-list a { min-width: 44px; justify-content: center; padding: 4px 6px; }
+  .game .nav-list a { min-width: 44px; padding: 4px 6px 12px; }
 }
 @media (max-width: 639px) {
   .game .nav-label {
@@ -958,6 +1041,13 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
   .game .hero-scene { min-height: 260px; }
 }
 
+/* the arrival room must fit one screen: text and scene side by side */
+@media (min-width: 600px) and (max-width: 899px) {
+  .game .hero-grid { grid-template-columns: 1.25fr 1fr; gap: 16px; }
+  .game .hero-scene { min-height: 300px; }
+  .game .hero-scene .portal { width: 92px; height: 160px; }
+  .game .hero h1 { font-size: 2.75rem; }
+}
 @media (min-width: 900px) {
   .game .level-scene { height: 150px; }
   .game .exit-btn { height: 132px; }
@@ -981,16 +1071,17 @@ html.classic {
 .classic body::before,
 .classic .hero-scene, .classic .space-sky, .classic .breach, .classic .narrator,
 .classic .chamber-num, .classic .sign-bar, .classic .sign-icons, .classic .kicker,
-.classic .test-progress, .classic .site-nav, .classic .level-scene, .classic .brand-mark, .classic .brand-sub,
+.classic .test-progress, .classic .site-nav, .classic .level-scene,
 .classic .chamber::before, .classic .chamber::after,
 .classic .panel::before, .classic .panel::after,
 .classic .timeline li::before { display: none !important; }
 
-.classic .site-header {
-  position: static !important; background: none; color: var(--ink); border: 0;
-}
-.classic .header-inner { max-width: 820px; padding: 8px 24px 0; }
-.classic .brand { display: none; }
+.classic .site-header { background: #fff; color: var(--ink); border-bottom: 1px solid var(--line); box-shadow: none; }
+.classic .header-inner { max-width: 820px; padding: 8px 24px; }
+.classic .tool-btn { background: #fff; color: var(--ink); border-color: var(--line); }
+.classic .tool-btn[aria-pressed="true"] { background: var(--btn-blue); border-color: var(--btn-blue); color: #fff; }
+.classic .brand { border-color: var(--line); }
+.classic .brand-sub { color: var(--ink-muted); }
 
 .classic .chamber, .classic .space {
   padding: 14px 0; min-height: 0; background: none; color: var(--ink); overflow: visible;
@@ -1021,8 +1112,11 @@ html.classic {
 .classic .timeline .panel { padding-left: 0; }
 .classic .hero-actions .btn-blue { display: none; }
 .classic .btn-ghost { background: var(--surface); color: var(--ink); }
-.classic .site-footer { background: none; color: var(--ink-muted); border-top: 1px solid var(--line); margin-top: 16px; }
-.classic .site-footer a { color: var(--blue); }
+.classic .site-footer { background: var(--surface-2); color: var(--ink); border-top: 1px solid var(--line); box-shadow: none; margin-top: 16px; }
+.classic .footer-inner { max-width: 820px; padding: 18px 24px; }
+.classic .footer-id p + p, .classic .footer-meta { color: var(--ink-muted); }
+.classic .footer-links a { color: var(--ink); border-color: var(--line); }
+.classic .footer-meta a { color: var(--blue); }
 
 /* ---------- Preferences ---------- */
 @media (prefers-reduced-motion: reduce) {
@@ -1046,8 +1140,7 @@ html.classic {
   body::before, .view-tools, .site-nav, .test-progress, .narrator, .hero-scene, .space-sky, .breach,
   .skip-link, .sprite, .level-scene, .hero-actions .btn-blue, .chamber-num, .sign-bar, .sign-icons, .kicker,
   .chamber::before, .chamber::after, .panel::before, .panel::after, .timeline li::before,
-  .site-footer p:last-child { display: none !important; }
-  .site-header { background: none; color: #000; border: 0; padding: 0; position: static !important; }
+  .site-header, .footer-links, .footer-id, .footer-meta p:last-child { display: none !important; }
   .chamber, .space { padding: 6pt 0; min-height: 0; background: none; color: #000; overflow: visible; }
   .space { --ink: #000; --ink-muted: #333; --surface: #fff; --line: #999; --blue: #0b63b6; }
   .chamber-head, .panel { box-shadow: none; border: 0; padding: 0; background: none; max-width: none; }
@@ -1072,11 +1165,12 @@ html.classic {
   .hero-pitch, .hero-facts, .hero-actions { margin-top: 4pt; }
   .hero-role { font-size: 12pt; }
   .space-lead { font-size: 9.5pt; }
-  .site-footer p + p { display: none; }
+  .footer-meta p + p { display: none; }
   .stack, .card-meta, .hero-facts, .kicker { font-size: 8.5pt; }
   .tag { font-size: 7pt; }
   .btn { min-height: 0; padding: 2pt 6pt; border: 1px solid #999; background: none; color: #000; }
   .btn::after { content: " : " attr(href); font-weight: 400; }
-  .site-footer { background: none; color: #333; padding: 6pt 0 0; }
+  .site-footer { background: none; color: #333; border: 0; box-shadow: none; }
+  .footer-inner { padding: 6pt 0 0; display: block; }
   a { color: #000; }
 }
