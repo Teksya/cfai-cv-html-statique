@@ -27,7 +27,7 @@ Contact : **lien vers le profil GitHub uniquement** (texte explicite, ex. « Voi
 
 - **Site 100 % statique** : aucun backend, aucune étape de build, aucun Node/npm, **aucune dépendance externe** (pas de CDN, pas de webfont). On sert le dossier et ça marche.
 - **HTML5** écrit à la main, **CSS local** dans `css/style.css` (CSS ordinaire, variables de thème dans `:root`). Pas de framework JS ni CSS.
-- JavaScript dans `js/app.js`, chargé avec `defer`, en **amélioration progressive**. Il gère : la bascule « CV classique » (mémorisée dans `localStorage`, forcée par `?classique` dans l'URL), le passage en vue classique à l'impression, la navigation par portails (portail bleu au clic, portail orange à l'arrivée), la barre de progression, la chambre courante dans la nav (`aria-current`) et la voix du narrateur. Sans JS, toutes les chambres restent affichées et lisibles et le lien PDF fonctionne : le contenu ne dépend jamais du script.
+- JavaScript dans `js/app.js`, chargé avec `defer`, en **amélioration progressive**. Il ajoute `html.game` : **un niveau par écran, sans scroll de page** (le contenu d'une chambre défile dans `.room` si besoin). On change de niveau par la nav, les flèches ← →, PageUp/PageDown, le hash de l'URL (historique géré) ou la porte de sortie, avec un passage par un portail orange (`.warp`). Il gère aussi les énigmes, la barre de progression par niveau, `aria-current="step"` dans la nav, la voix du narrateur et la bascule « CV classique » (`html.classic` : page qui défile, mémorisée dans `localStorage`, forcée par `?classique`, imposée à l'impression). Sans JS, la page défile normalement avec toutes les chambres visibles et le lien PDF fonctionne : le contenu ne dépend jamais du script.
 - **Export PDF** : `cv-olivier-dutoit.pdf` est généré depuis la vue classique (voir « Régénérer le PDF »). Le régénérer et le commiter à chaque modification du contenu.
 
 ### Organisation du CSS
@@ -106,8 +106,8 @@ Thème sombre (`prefers-color-scheme`) : « aile désaffectée » du labo, panne
 - **Panneau de chambre** (`.chamber-head`) : plaque rétroéclairée avec grand numéro fin (`.chamber-num`), kicker « Chambre de test 0X sur 06 », `h2`, barre de progression (`.sign-bar`, variable `--p`) et pictogrammes (`.sign-icons`).
 - **Plaques** (`.panel`) : cartes blanches à deux vis ; compétences en étiquettes (`.chips`), expériences en `article.card`, projets en `.card-list`, formation en `.timeline` numérotée.
 - **Portails** (`.portal` > `.portal-view` + SVG `<use href="#portal-rim">`) : bord en flamme par filtre SVG (`#f-rim` : turbulence animée, double halo), lumière projetée sur le mur, vue de l'autre côté avec récursion (on aperçoit l'autre portail au fond), montés en perspective sur les murs ; un portail est posé au sol sur la Lune.
-- **Scène de niveau** (`.level-scene.level-<id>`, `aria-hidden`) en bas de chaque chambre 01–05 : une énigme puis une porte de sortie (`.exit`) reliée par un fil indicateur (`.wire`). 01 cube et bouton, 02 pont de lumière, 03 laser et récepteur, 04 plaque de propulsion et trajectoire, 05 gels. Le HTML/CSS montre l'état **résolu** ; avec JS, `.js .level-scene:not(.is-cleared)` montre l'état non résolu et `app.js` ajoute `is-cleared` quand la scène est visible à 80 % (porte qui s'ouvre, fil orange, voix « Niveau 0X terminé »). Une nouvelle énigme : un bloc d'éléments décoratifs + sa règle « non résolu ».
-- **Entrée de niveau** : avec JS et sans `prefers-reduced-motion`, les plaques se déplient du mur quand la chambre entre à l'écran (`.chamber.is-in`). Jamais en vue classique ni à l'impression.
+- **Scène de niveau** (`.level-scene.level-<id>`) en bas de chaque chambre 01–05 : décor dans `.scene-decor` (`aria-hidden`), énigme puis porte de sortie reliée par un fil indicateur (`.wire`). 01 cube et bouton, 02 pont de lumière, 03 laser à orienter, 04 plaque de propulsion (le cube suit la trajectoire, Web Animations), 05 gels. Deux vrais boutons, masqués sans JS : l'invite `.puzzle-btn` (« E » au clavier) résout l'énigme, `.exit-btn` est la porte (verrouillée tant que l'énigme n'est pas résolue : elle tremble et le narrateur l'explique ; le menu permet toujours de passer). Le CSS montre l'état **résolu** ; `.game .level-scene:not(.is-cleared)` montre l'état non résolu. Une nouvelle énigme : décor + règle « non résolu » + invite positionnée (`.pb-<id>`), et un solveur dans `solvers` de `app.js` si l'animation ne tient pas en CSS.
+- **Entrée de niveau** : en mode jeu et sans `prefers-reduced-motion`, les plaques se déplient du mur à l'arrivée dans le niveau (`.chamber.is-in`). Le titre du niveau reçoit le focus.
 - **Accueil** : fenêtre de salle d'observation, deux portails face à face, cube au sol.
 - **Final** : brèche dans le plafond, étoiles sur deux couches, Terre éclairée de côté, cube à la dérive, sol lunaire SVG à cratères.
 - **Narrateur** (JS, ≥ 900 px, `aria-hidden`) : une phrase originale par chambre (`data-annonce`), ton pince-sans-rire, effacée après 7 s et en bas de page.
@@ -126,7 +126,7 @@ Police système sans-serif, texte ≥ 16 px. Numéros de chambre en graisse 200,
 
 ### Responsive
 
-Mobile-first, aucun scroll horizontal. Mobile : nav en grille, scène d'accueil sous le texte. ≥ 900 px : en-tête collant, nav en ligne, narrateur. ≥ 1360 px : les outils fixes tiennent dans la ligne de l'en-tête.
+Mobile-first, aucun scroll horizontal. Mode jeu : hauteur `100dvh`, < 640 px la nav ne montre que les numéros de niveau (libellés lisibles par les lecteurs d'écran), < 900 px le nom est masqué. Sans JS / vue classique : nav en grille sur mobile, en ligne ≥ 900 px avec en-tête collant. Narrateur ≥ 900 px. ≥ 1360 px : les outils fixes tiennent dans la ligne de l'en-tête.
 
 ## Validation avant livraison
 

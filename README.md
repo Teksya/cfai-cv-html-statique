@@ -12,14 +12,15 @@ CV en ligne sur une seule page HTML, présenté comme un parcours de **chambres 
 
 ## Concept
 
-- Chaque section du CV est un **niveau** : une chambre de test numérotée (00 accueil → 06 contact) avec son panneau, ses plaques qui se déplient du mur à l'arrivée et, en bas, une énigme (cube et bouton, pont de lumière, laser, plaque de propulsion, gels) qui se résout quand on atteint la fin de la section : la porte de sortie s'ouvre.
+- **On joue le CV niveau par niveau, sans scroll** : chaque section est une chambre de test (00 accueil → 06 contact) qui occupe l'écran. En bas, une énigme (lâcher le cube sur le bouton, activer le pont de lumière, orienter le laser, lancer le cube, ouvrir les tuyaux de gel) : on clique sur l'invite ou on appuie sur **E**, la porte s'ouvre, on la franchit pour passer au niveau suivant.
+- Navigation libre : menu des niveaux, flèches ← →, PageUp/PageDown, bouton Précédent du navigateur.
 - Décor réaliste en CSS/SVG, sans image : panneaux muraux biseautés, champs d'énergie, grilles de sol, portails au bord en flamme (filtre SVG) qui laissent voir l'autre côté.
 - Final : le plafond de la dernière chambre est éventré, on sort sur la Lune avec la Terre dans le ciel.
-- Les liens internes « téléportent » : portail bleu au clic, portail orange à l'arrivée.
+- Chaque changement de niveau passe par un portail orange qui s'ouvre là où l'on a cliqué.
 - Un narrateur commente chaque chambre (textes originaux).
 - Bouton fixe en haut à gauche **« Afficher le CV classique »** : même contenu en mise en page sobre sur une colonne (mémorisé dans le navigateur, ou via `?classique`).
 - **« Exporter en PDF »** : télécharge `cv-olivier-dutoit.pdf`, généré depuis la vue classique. L'impression du navigateur bascule aussi en vue classique.
-- Sans JavaScript, tout le contenu reste affiché et lisible.
+- Sans JavaScript (et en vue classique), le CV est une page normale qui défile : tout le contenu reste affiché et lisible.
 - Accessibilité : lien d'évitement, navigation clavier, `aria-current` sur la chambre courante, contrastes AA, `prefers-reduced-motion` (animations et flamme SVG coupées), `forced-colors`.
 - Thème clair / sombre selon `prefers-color-scheme`.
 
