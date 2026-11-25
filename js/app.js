@@ -186,7 +186,16 @@
     var sky = section.querySelector('.space-sky');
     if (sky) sky.style.transform = 'translate3d(' + (cam.x * -24).toFixed(1) + 'px,' + (cam.y * -14).toFixed(1) + 'px,0) scale(1.06)';
     // the WebGL room is drawn with the very same camera angles
-    if (gl3d) window.CV3D.frame(section, cam.x * 7, -cam.y * 4.5, now);
+    if (gl3d) {
+      try {
+        window.CV3D.frame(section, cam.x * 7, -cam.y * 4.5, now);
+      } catch (error) {
+        // never leave a black screen: fall back to the CSS 3D room
+        gl3d = false;
+        root.classList.remove('gl');
+        if (window.console) console.error('WebGL scene stopped:', error);
+      }
+    }
   }
   requestAnimationFrame(cameraFrame);
 

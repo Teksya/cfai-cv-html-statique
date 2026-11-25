@@ -49,17 +49,15 @@
     '  if (dot(uClip.xyz, vPortal) + uClip.w > 0.) discard;\n' +
     '  vec3 N = normalize(vNormal); vec3 V = normalize(uEye - vWorld); if (dot(N, V) < 0.) N = -N;\n' +
     '  vec3 alb = uColor; float rough = uRough; vec3 emis = uEmis; float alpha = uAlpha; float edge;\n' +
-    '  float white = mix(1., .34, uDark);\n' +
-    '  if (uPat == 1) {\n' +                       // wall panels, dark lower band on the side walls
-    '    vec2 p = abs(N.z) > .5 ? vWorld.xy : vWorld.zy;\n' +
-    '    alb = tiles(p, 120., edge) * white; alb = mix(vec3(.04), alb, smoothstep(1., 3.5, edge)); alb += (1. - smoothstep(3.5, 9., edge)) * .05;\n' +
-    '    if (abs(N.x) > .5 && vWorld.y > uRoom.y * .76) { float e2; vec3 d = tiles(vWorld.zy, 240., e2);\n' +
-    '      alb = mix(vec3(.015), vec3(.07) + d * .012, smoothstep(1., 4., e2)); rough = .4; }\n' +
+    '  if (uPat == 1) {\n' +                       // walls: dark metal panels. Dark = no portal can open here.
+    '    vec2 p = abs(N.z) > .5 ? vWorld.xy : vWorld.zy; vec3 t = tiles(p, 120., edge);\n' +
+    '    alb = vec3(.034, .037, .043) + (t - .82) * .22; alb = mix(vec3(.006), alb, smoothstep(1., 3.5, edge));\n' +
+    '    alb += (1. - smoothstep(3.5, 10., edge)) * .015; rough = .38;\n' +
     '  } else if (uPat == 2) {\n' +                // floor: dark glossy tiles with a fine grate
     '    vec2 p = vWorld.xz; tiles(p, 160., edge); float gr = step(.5, fract(p.x / 9.));\n' +
     '    alb = mix(vec3(.02), vec3(.085 + gr * .04), smoothstep(1., 3., edge)); rough = .26;\n' +
     '  } else if (uPat == 3) {\n' +                // ceiling: panels and emissive strips
-    '    vec2 p = vWorld.xz; alb = tiles(p, 120., edge) * white * .9; alb = mix(vec3(.05), alb, smoothstep(1., 3.5, edge));\n' +
+    '    vec2 p = vWorld.xz; vec3 t = tiles(p, 120., edge); alb = vec3(.045, .048, .055) + (t - .82) * .25; alb = mix(vec3(.006), alb, smoothstep(1., 3.5, edge));\n' +
     '    emis += vec3(.92, .97, 1.) * strip(p, 0.) * 3.2;\n' +
     '  } else if (uPat == 4) {\n' +                // weighted cube face: bumpers, seams, plate, lit lens
     '    vec2 uv = faceUV(); vec2 q = abs(uv); float r = length(uv);\n' +
@@ -80,13 +78,13 @@
     '  for (int i = 0; i < 4; i++) { if (d1[i] > 2.) dm = min(dm, d1[i]); } if (d5 > 2.) dm = min(dm, d5);\n' +
     '  float ao = .42 + .58 * smoothstep(0., 260., dm);\n' +
     '  float sky = dot(N, vec3(0., -1., 0.)) * .5 + .5;\n' +
-    '  vec3 col = alb * mix(vec3(.13, .14, .17), vec3(.3, .31, .33), sky) * ao * mix(1., .6, uDark);\n' +
+    '  vec3 col = alb * mix(vec3(.2, .21, .25), vec3(.42, .43, .46), sky) * ao * mix(1., .75, uDark);\n' +
     '  float spec0 = mix(.9, .03, rough); float shin = mix(220., 8., rough);\n' +
     '  for (int i = 0; i < 8; i++) { if (i >= uLightN) break;\n' +
     '    vec3 L = uLightPos[i].xyz - vWorld; float d = length(L); L /= d; float att = 1. / (1. + pow(d / uLightPos[i].w, 2.)); float sh = 1.;\n' +
     '    if (i == 0) { vec3 pc = vShadow.xyz / vShadow.w * .5 + .5;\n' +
     '      if (pc.x > 0. && pc.x < 1. && pc.y > 0. && pc.y < 1. && pc.z < 1.) { float s = 0.;\n' +
-    '        for (int x = -1; x <= 1; x++) for (int y = -1; y <= 1; y++) s += texture(uShadowMap, vec3(pc.xy + vec2(x, y) * (1.6 / ' + SHADOW + '.), pc.z - .0018));\n' +
+    '        for (int x = -1; x <= 1; x++) for (int y = -1; y <= 1; y++) s += texture(uShadowMap, vec3(pc.xy + vec2(x, y) * (1.6 / ' + SHADOW + '.), pc.z - .003));\n' +
     '        sh = mix(.12, 1., s / 9.); } }\n' +
     '    float ndl = max(dot(N, L), 0.); vec3 H = normalize(L + V);\n' +
     '    col += (alb * ndl + spec0 * pow(max(dot(N, H), 0.), shin) * ndl) * uLightCol[i] * att * sh * ao;\n' +
@@ -110,16 +108,23 @@
     '  return mix(mix(hash(i), hash(i + vec2(1., 0.)), f.x), mix(hash(i + vec2(0., 1.)), hash(i + vec2(1., 1.)), f.x), f.y); }\n' +
     'void main(){\n' +
     '  if (dot(uClip.xyz, vPortal) + uClip.w > 0.) discard;\n' +
-    '  vec2 uv = vLocal.xy * 2.; float r = length(uv); vec2 dir = uv / max(r, 1e-4);\n' +
-    '  float n = noise(dir * 3. + vec2(uTime * 1.3, -uTime * .9)) * .6 + noise(dir * 7. - vec2(uTime * 2.1, uTime * 1.6)) * .4;\n' +
-    '  float rr = r + (n - .5) * .16;\n' +
-    '  if (rr > 1.1) discard;\n' +
-    '  float rim = smoothstep(.66, .84, rr) * (1. - smoothstep(.9, 1.1, rr));\n' +
-    '  vec3 inner;\n' +
-    '  if (uHasView == 1) { inner = texture(uView, gl_FragCoord.xy / uViewport).rgb; inner = mix(inner, uColor, smoothstep(.4, .8, rr) * .55); }\n' +
-    '  else { float sw = noise(dir * 2. + vec2(r * 5. - uTime * 1.5, r * 4.)); inner = uColor * (.12 + .5 * sw) * (.35 + r); }\n' +
-    '  vec3 col = mix(inner, mix(uColor * 1.5, vec3(1.), smoothstep(.45, 1., rim)), rim);\n' +
-    '  o = vec4(col, rr < .86 ? 1. : 1. - smoothstep(.9, 1.1, rr));\n' +
+    '  vec2 uv = vLocal.xy * 2.8; float r = length(uv); vec2 dir = uv / max(r, 1e-4);\n' +   // r = 1 on the portal edge
+    '  float n = noise(dir * 8. + vec2(uTime * 1.6, -uTime * 1.1)) * .6 + noise(dir * 17. - vec2(uTime * 2.4, uTime * 1.9)) * .4;\n' +
+    '  float rr = r + (n - .5) * .07;\n' +
+    '  if (rr > 1.38) discard;\n' +
+    '  float core = exp(-pow((rr - .95) / .028, 2.));\n' +            // white-hot line
+    '  float flame = exp(-pow((rr - .95) / .09, 2.));\n' +            // coloured flame around it
+    '  float halo = exp(-pow(max(rr - .95, 0.) / .17, 2.)) * .5;\n' + // glow on the wall
+    '  vec3 col = uColor * (flame * 1.7 + halo) + vec3(1.) * core * 1.1; float alpha = clamp(flame * .9 + halo * .5, 0., 1.);\n' +
+    '  if (rr < .95) {\n' +
+    '    vec3 inner;\n' +
+    '    if (uHasView == 1) { inner = texture(uView, gl_FragCoord.xy / uViewport).rgb; }\n' +
+    '    else { float a = r * 5. - uTime * 1.3; vec2 q = mat2(cos(a), -sin(a), sin(a), cos(a)) * dir;\n' +   // closed portal: a slow whirl
+    '      inner = uColor * (.05 + .3 * noise(q * 3. + r * 2.)) * (.4 + r); }\n' +
+    '    inner = mix(inner, uColor, smoothstep(.55, .95, rr) * .5);\n' +
+    '    col = inner + uColor * flame * 1.7 + vec3(1.) * core * 1.1; alpha = 1.;\n' +
+    '  }\n' +
+    '  o = vec4(col, alpha);\n' +     // premultiplied: the glow adds light, the disc hides the wall
     '}';
 
   var DEPTH_VS = '#version 300 es\nlayout(location=0) in vec3 aPos; uniform mat4 uLightVP, uModel;\n' +
@@ -324,13 +329,19 @@
     box(out, base, w, h, 2, -26, { color: [1, .9, .7], emis: [1.5, 1.25, .85], cast: false }); // lit corridor behind
     if (s.cleared) s.lights.push({ at: base.transformPoint(new DOMPoint(w / 2, h * .6, 30)), color: [1.1, .9, .6], radius: 220 });
   }
-  function doorPanel(el, base, w, h, out) { box(out, base, w, h, 6, -4, { pat: 9, color: [.8, .82, .85], rough: .35 }); }
+  function doorPanel(el, base, w, h, out) { box(out, base, w, h, 6, -4, { pat: 9, color: [.2, .215, .235], rough: .3 }); }
   function portal(el, base, w, h, out, s) {
+    // white = a surface that accepts portals: wall portals get their own white panel
+    if (el.closest('.wall')) {
+      box(out, base.translate(-w * .22, -h * .1, 0), w * 1.44, h * 1.2, 8, 3, { pat: 9, cast: false });
+      s.keepOut.push(base.transformPoint(new DOMPoint(w / 2, h / 2, 0)), Math.max(w, h));
+    }
     s.portals.push({ base: base, w: w, h: h, color: el.classList.contains('portal-orange') ? 'orange' : 'blue' });
   }
-  function windowPane(el, base, w, h, out) {
+  function windowPane(el, base, w, h, out, s) {
     box(out, base.translate(-8, -8, 0), w + 16, h + 16, 10, 4, { color: METAL, rough: .3, cast: false });
     box(out, base, w, h, 4, 10, { color: [.02, .03, .04], rough: .04, emis: [.01, .015, .02], cast: false });
+    s.keepOut.push(base.transformPoint(new DOMPoint(w / 2, h / 2, 0)), Math.max(w, h));
   }
 
   function collect(section) {
@@ -384,6 +395,7 @@
     fs.items.forEach(function (item) { if (item.alpha >= 1) setItem(p, item); });
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
     fs.items.forEach(function (item) { if (item.alpha < 1) setItem(p, item); });
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); // portals are premultiplied
 
     // portals last: fire ring, and the other side when both are open
     var q = progs.portal;
@@ -401,7 +413,7 @@
       gl.uniform1i(q.u('uHasView'), view ? 1 : 0);
       if (view) { gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, view.tex); gl.uniform1i(q.u('uView'), 1); }
       gl.uniform3fv(q.u('uColor'), portal.color === 'orange' ? ORANGE : BLUE);
-      gl.uniformMatrix4fv(q.u('uModel'), false, portal.base.translate(portal.w / 2, portal.h / 2, 5).scaleSelf(portal.w * 1.12, portal.h * 1.12, 1).toFloat32Array());
+      gl.uniformMatrix4fv(q.u('uModel'), false, portal.base.translate(portal.w / 2, portal.h / 2, 9).scaleSelf(portal.w * 1.4, portal.h * 1.4, 1).toFloat32Array());
       gl.drawArrays(gl.TRIANGLES, 0, 6);
     });
     gl.depthMask(true); gl.disable(gl.BLEND);
@@ -428,7 +440,7 @@
     return v;
   }
 
-  function roomItems(w, h, time) {
+  function roomItems(w, h, time, keepOut) {
     var out = [], zc = (FRONT - DEPTH) / 2, len = DEPTH + FRONT;
     function wall(x, y, z, sx, sy, sz, pat) {
       out.push({ mesh: 'box', m: new DOMMatrix().translateSelf(x, y, z).scaleSelf(sx, sy, sz), color: WHITE, rough: .62, emis: [0, 0, 0], pat: pat, alpha: 1, cast: false });
@@ -438,15 +450,21 @@
     wall(w / 2, h / 2, -DEPTH - 10, w + 40, h + 40, 20, 1);
     wall(-10, h / 2, zc, 20, h, len, 1);
     wall(w + 10, h / 2, zc, 20, h, len, 1);
-    // restless wall: a few panels of the back wall slide out on their own
-    [[1, 1], [3, 0], [6, 2], [8, 1], [10, 3], [4, 4], [11, 0]].forEach(function (cell, i) {
+    // restless wall: a few panels of the back wall slide out on their own,
+    // never where something is mounted (portal panel, observation window)
+    [[1, 1], [3, 0], [6, 2], [8, 1], [10, 3], [4, 3], [11, 0]].forEach(function (cell, i) {
       var x = cell[0] * 120 + 60, y = cell[1] * 120 + 60;
       if (x > w - 60 || y > h * .7) return;
-      var phase = (time / 1000 / (9 + i * 1.3) + i * .37) % 1;
-      var ext = 90 * Math.max(0, Math.sin(Math.min(1, Math.max(0, (phase - .55) / .4)) * Math.PI));
-      if (ext < 1) return;
-      out.push({ mesh: 'box', m: new DOMMatrix().translateSelf(x, y, -DEPTH + ext / 2).scaleSelf(116, 116, ext),
-        color: WHITE, rough: .6, emis: [0, 0, 0], pat: 9, alpha: 1, cast: true });
+      for (var j = 0; j < keepOut.length; j += 2) {
+        if (Math.abs(keepOut[j].z + DEPTH) < 40 && Math.hypot(keepOut[j].x - x, keepOut[j].y - y) < keepOut[j + 1] * .75 + 90) return;
+      }
+      var phase = (time / 1000 / (10 + i * 1.7) + i * .37) % 1;
+      var t = Math.min(1, Math.max(0, (phase - .5) / .45));
+      var inOut = Math.min(1, t / .3) * Math.min(1, (1 - t) / .3);
+      var ext = 80 * inOut * inOut * (3 - 2 * inOut); // eased in and out, no pop
+      if (ext < .5) return;
+      out.push({ mesh: 'box', m: new DOMMatrix().translateSelf(x, y, -DEPTH + ext / 2).scaleSelf(117, 117, ext),
+        color: [.04, .043, .05], rough: .38, emis: [0, 0, 0], pat: 9, alpha: 1, cast: true });
     });
     return out;
   }
@@ -472,8 +490,8 @@
     var inverse = world.inverse();
     var e = inverse.transformPoint(new DOMPoint(w * .5, h * ORIGIN_Y, PERSP));
 
-    var s = { portals: [], lights: [], cleared: false, aimed: false };
-    var items = roomItems(w, h, time);
+    var s = { portals: [], lights: [], keepOut: [], cleared: false, aimed: false };
+    var items = [];
     memo = new Map();
     skins.forEach(function (skin) {
       var el = skin.el;
@@ -484,14 +502,15 @@
       skin.draw(el, chain(el, section), el.offsetWidth, el.offsetHeight, items, s);
     });
     memo = null;
+    items = items.concat(roomItems(w, h, time, s.keepOut));
 
     // lights: ceiling strips (the first one casts shadows), then portals and glowing pieces
-    var dim = dark.matches ? .5 : 1;
+    var dim = dark.matches ? .8 : 1;
     var lights = [
-      { at: { x: w * .34, y: 40, z: -120 }, color: [1.9 * dim, 1.95 * dim, 2 * dim], radius: 820 },
-      { at: { x: w * .2, y: 80, z: -660 }, color: [.9 * dim, .92 * dim, .95 * dim], radius: 620 },
-      { at: { x: w * .8, y: 80, z: -660 }, color: [.9 * dim, .92 * dim, .95 * dim], radius: 620 },
-      { at: { x: w / 2, y: 90, z: 120 }, color: [.8 * dim, .82 * dim, .85 * dim], radius: 700 }
+      { at: { x: w * .34, y: 40, z: -120 }, color: [2.6 * dim, 2.65 * dim, 2.7 * dim], radius: 900 },
+      { at: { x: w * .2, y: 80, z: -660 }, color: [1.5 * dim, 1.52 * dim, 1.56 * dim], radius: 700 },
+      { at: { x: w * .8, y: 80, z: -660 }, color: [1.5 * dim, 1.52 * dim, 1.56 * dim], radius: 700 },
+      { at: { x: w / 2, y: 90, z: 120 }, color: [1.2 * dim, 1.22 * dim, 1.25 * dim], radius: 760 }
     ];
     s.portals.forEach(function (portal) {
       var c = portal.color === 'orange' ? ORANGE : BLUE;
@@ -537,7 +556,7 @@
         gl.viewport(0, 0, v.w, v.h);
         gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        drawView(fs, move.toFloat32Array(), [n[0], n[1], n[2], -(n[0] * o.x + n[1] * o.y + n[2] * o.z) + 1],
+        drawView(fs, move.toFloat32Array(), [n[0], n[1], n[2], -(n[0] * o.x + n[1] * o.y + n[2] * o.z) + 14],
           [virtualEye.x, virtualEye.y, virtualEye.z], false, v.w, v.h, pair[1]);
         pair[0].view = v;
       });
