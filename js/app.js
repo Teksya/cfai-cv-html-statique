@@ -14,13 +14,54 @@
   var chambers = Array.prototype.slice.call(document.querySelectorAll('.chamber'));
   var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-list a'));
 
+  // Classic view: plain one-column CV. Remembered per browser,
+  // forced by ?classique in the URL (used to generate the PDF).
+  var toggle = document.getElementById('toggle-classic');
+  var toggleLabel = toggle && toggle.querySelector('.tool-label');
+
+  function readPref() {
+    try { return localStorage.getItem('cv-view') === 'classic'; } catch (e) { return false; }
+  }
+  function savePref(on) {
+    try { localStorage.setItem('cv-view', on ? 'classic' : 'chambers'); } catch (e) { /* storage blocked */ }
+  }
+  function setClassic(on) {
+    root.classList.toggle('classic', on);
+    if (toggle) {
+      toggle.setAttribute('aria-pressed', String(on));
+      toggleLabel.textContent = on ? 'Revenir au parcours de test' : 'Afficher le CV classique';
+    }
+    if (narrator) narrator.classList.add('is-hidden');
+    syncHeaderHeight();
+  }
+
+  if (toggle) {
+    toggle.hidden = false;
+    toggle.addEventListener('click', function () {
+      var on = !root.classList.contains('classic');
+      setClassic(on);
+      savePref(on);
+      window.scrollTo(0, 0);
+    });
+  }
+
+  // Printing (and "save as PDF") always uses the classic layout.
+  var classicBeforePrint = false;
+  window.addEventListener('beforeprint', function () {
+    classicBeforePrint = root.classList.contains('classic');
+    root.classList.add('classic');
+  });
+  window.addEventListener('afterprint', function () {
+    if (!classicBeforePrint) root.classList.remove('classic');
+  });
+
   // Sticky header must not hide anchored headings.
   function syncHeaderHeight() {
     var sticky = getComputedStyle(header).position === 'sticky';
     root.style.setProperty('--header-h', sticky ? header.offsetHeight + 'px' : '0px');
   }
-  syncHeaderHeight();
   window.addEventListener('resize', syncHeaderHeight);
+  setClassic(/[?&]classique/.test(location.search) || readPref());
 
   // Scroll progress across the whole test.
   var ticking = false;
@@ -45,7 +86,7 @@
       if (link.getAttribute('href') === '#' + section.id) link.setAttribute('aria-current', 'true');
       else link.removeAttribute('aria-current');
     });
-    if (!narrator) return;
+    if (!narrator || root.classList.contains('classic')) return;
     narrator.classList.add('is-hidden');
     clearTimeout(narratorTimer);
     // Read the line when the timer fires: fast jumps must show the last chamber.
@@ -90,6 +131,7 @@
   document.addEventListener('click', function (event) {
     var link = event.target.closest('a[href^="#"]');
     if (!link || link.classList.contains('skip-link') || reduceMotion.matches) return;
+    if (root.classList.contains('classic')) return;
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     var target = document.getElementById(link.getAttribute('href').slice(1));
     if (!target) return;

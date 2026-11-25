@@ -19,6 +19,17 @@
 <body>
   <a class="skip-link" href="#contenu">Aller au contenu</a>
 
+  <div class="view-tools">
+    <button type="button" class="tool-btn" id="toggle-classic" aria-pressed="false" hidden>
+      <svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg>
+      <span class="tool-label">Afficher le CV classique</span>
+    </button>
+    <a class="tool-btn" href="cv-olivier-dutoit.pdf" download>
+      <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+      <span>Exporter en PDF</span>
+    </a>
+  </div>
+
   <svg class="sprite" aria-hidden="true" focusable="false">
     <symbol id="i-server" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h4M12 17.5h4"/></symbol>
     <symbol id="i-network" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v4.5M12 12l-5.5 5M12 12l5.5 5"/></symbol>
@@ -34,6 +45,9 @@
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></symbol>
     <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2.5"/><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 7.5v9M18 10.5c0 4-6 3-11 6.5"/></symbol>
     <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+    <symbol id="i-portal" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="5" ry="9"/><path d="M12 7v10"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
   </svg>
 
@@ -80,6 +94,7 @@
         </div>
 
         <div class="hero-scene" aria-hidden="true">
+          <span class="observation"></span>
           <div class="sign">
             <p class="sign-num">00</p>
             <p class="sign-total">/06</p>
@@ -108,6 +123,7 @@
             <p class="kicker">Chambre de test 01 sur 06</p>
             <h2 id="titre-competences">Compétences</h2>
             <div class="sign-bar" style="--p: 1" aria-hidden="true"><span></span></div>
+            <ul class="sign-icons" aria-hidden="true"><li><svg class="icon"><use href="#i-server"/></svg></li><li><svg class="icon"><use href="#i-network"/></svg></li><li><svg class="icon"><use href="#i-layers"/></svg></li><li><svg class="icon"><use href="#i-shield"/></svg></li></ul>
           </div>
         </div>
 
@@ -183,6 +199,7 @@
             <p class="kicker">Chambre de test 02 sur 06</p>
             <h2 id="titre-experiences">Expériences</h2>
             <div class="sign-bar" style="--p: 2" aria-hidden="true"><span></span></div>
+            <ul class="sign-icons" aria-hidden="true"><li><svg class="icon"><use href="#i-briefcase"/></svg></li><li><svg class="icon"><use href="#i-headset"/></svg></li><li><svg class="icon"><use href="#i-server"/></svg></li><li><svg class="icon"><use href="#i-user"/></svg></li></ul>
           </div>
         </div>
 
@@ -244,6 +261,7 @@
             <p class="kicker">Chambre de test 03 sur 06</p>
             <h2 id="titre-projets">Projets</h2>
             <div class="sign-bar" style="--p: 3" aria-hidden="true"><span></span></div>
+            <ul class="sign-icons" aria-hidden="true"><li><svg class="icon"><use href="#i-flask"/></svg></li><li><svg class="icon"><use href="#i-server"/></svg></li><li><svg class="icon"><use href="#i-code"/></svg></li><li><svg class="icon"><use href="#i-cube"/></svg></li></ul>
           </div>
         </div>
 
@@ -320,6 +338,7 @@
             <p class="kicker">Chambre de test 04 sur 06</p>
             <h2 id="titre-formation">Formation</h2>
             <div class="sign-bar" style="--p: 4" aria-hidden="true"><span></span></div>
+            <ul class="sign-icons" aria-hidden="true"><li><svg class="icon"><use href="#i-cap"/></svg></li><li><svg class="icon"><use href="#i-doc"/></svg></li><li><svg class="icon"><use href="#i-shield"/></svg></li><li><svg class="icon"><use href="#i-user"/></svg></li></ul>
           </div>
         </div>
 
@@ -356,6 +375,7 @@
             <p class="kicker">Chambre de test 05 sur 06</p>
             <h2 id="titre-profil">Profil</h2>
             <div class="sign-bar" style="--p: 5" aria-hidden="true"><span></span></div>
+            <ul class="sign-icons" aria-hidden="true"><li><svg class="icon"><use href="#i-user"/></svg></li><li><svg class="icon"><use href="#i-headset"/></svg></li><li><svg class="icon"><use href="#i-cube"/></svg></li><li><svg class="icon"><use href="#i-portal"/></svg></li></ul>
           </div>
         </div>
 
@@ -396,12 +416,29 @@
     <section id="contact" class="chamber space" aria-labelledby="titre-contact" data-annonce="Vous êtes sorti du complexe. Ici, il n'y a plus de murs. Seulement un lien de contact.">
       <div class="breach" aria-hidden="true"></div>
       <div class="space-sky" aria-hidden="true">
+        <span class="stars stars-far"></span>
+        <span class="stars stars-near"></span>
         <span class="earth"></span>
+        <span class="drift-cube"><svg class="icon"><use href="#i-cube"/></svg></span>
         <svg class="moon-ground" viewBox="0 0 1200 220" preserveAspectRatio="none">
-          <path d="M0 90 C 180 60 320 70 470 85 S 760 60 900 72 1120 95 1200 80 V220 H0Z"/>
-          <ellipse cx="260" cy="140" rx="70" ry="12"/>
-          <ellipse cx="700" cy="170" rx="110" ry="16"/>
-          <ellipse cx="1040" cy="130" rx="50" ry="9"/>
+          <defs>
+            <linearGradient id="g-ground" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#b4b7bc"/>
+              <stop offset=".35" stop-color="#8d9198"/>
+              <stop offset="1" stop-color="#4e5258"/>
+            </linearGradient>
+            <radialGradient id="g-crater" cx=".5" cy=".35" r=".65">
+              <stop offset="0" stop-color="#5c6066"/>
+              <stop offset=".7" stop-color="#70757b"/>
+              <stop offset="1" stop-color="#c3c6ca"/>
+            </radialGradient>
+          </defs>
+          <path class="ground" d="M0 90 C 180 60 320 70 470 85 S 760 60 900 72 1120 95 1200 80 V220 H0Z"/>
+          <ellipse class="crater" cx="260" cy="140" rx="70" ry="12"/>
+          <ellipse class="crater" cx="700" cy="172" rx="110" ry="16"/>
+          <ellipse class="crater" cx="1040" cy="130" rx="50" ry="9"/>
+          <ellipse class="crater" cx="480" cy="118" rx="26" ry="5"/>
+          <ellipse class="crater" cx="120" cy="190" rx="44" ry="8"/>
         </svg>
         <span class="portal portal-blue portal-moon"></span>
       </div>
@@ -412,6 +449,7 @@
             <p class="kicker">Hors du complexe · 06 sur 06</p>
             <h2 id="titre-contact">Me contacter</h2>
             <div class="sign-bar" style="--p: 6" aria-hidden="true"><span></span></div>
+            <ul class="sign-icons" aria-hidden="true"><li><svg class="icon"><use href="#i-moon"/></svg></li><li><svg class="icon"><use href="#i-portal"/></svg></li><li><svg class="icon"><use href="#i-branch"/></svg></li><li><svg class="icon"><use href="#i-user"/></svg></li></ul>
           </div>
         </div>
         <div class="panel panel-space">
