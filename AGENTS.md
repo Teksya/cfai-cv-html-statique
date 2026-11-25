@@ -25,41 +25,46 @@ Contact : **lien vers le profil GitHub uniquement** (texte explicite, ex. « Voi
 
 ## Stack et environnement
 
-- **Site 100 % statique** : aucun backend, aucune étape de build, aucun Node/npm, **aucune dépendance externe** (pas de CDN). On ouvre `index.html` dans le navigateur et ça marche.
-- **HTML5** écrit à la main, **CSS local** dans `css/style.css` : variables de thème, composants, et une petite section « Utilitaires » (`flex`, `grid`, `gap-2`, `mt-4`, `text-xl`, `sm:grid-cols-2`…) reprise de la nomenclature Tailwind pour rester lisible. Tailwind lui-même n'est plus chargé : le Play CDN pesait ≈ 400 ko de JS et plombait PageSpeed.
-- Pas de framework JS ni CSS.
-- JavaScript dans `js/app.js`, chargé avec `defer`, en **amélioration progressive** : il gère le bureau interactif (ouvrir/fermer/réduire/agrandir/déplacer les fenêtres, panneau, menu du lanceur, horloge, easter eggs). Sans JS, toutes les fenêtres sont affichées empilées et le site reste complet et lisible. Toute nouvelle fonctionnalité JS doit respecter ce principe : le contenu ne dépend jamais du script.
-- Écran de démarrage (`#boot`) : affiché par JS à chaque chargement, jamais si `prefers-reduced-motion` ; lignes de boot puis splash avec anneau et barre, ≈ 3 s, passable d'une touche ou d'un clic (pas de bouton), focus rendu à la fenêtre active à la fin. Aucun logo ni nom de distribution.
-- Easter eggs : ils doivent rester inoffensifs, fermables au clavier (n'importe quelle touche ou clic, avec retour du focus), présentés comme des `role="dialog"` focusables, sans texte ni visuel de marque. Existants : terminal interactif (`#terminal`, commandes dans `termCommands` de `app.js`, le contenu des `cat` est lu dans le DOM des fenêtres, jamais dupliqué), notifications (`notify()` : `role="status"`, auto-fermeture 9 s mise en pause au survol/focus, bouton Fermer, Échap), kernel panic (Konami ou `panic`), « Quitter la session », `rm -rf /` qui fait disparaître puis restaurer les icônes. Une nouvelle commande de terminal s'ajoute dans `termCommands` et dans le texte de `help`.
-- Police système (pas de webfont) sauf décision contraire.
+- **Site 100 % statique** : aucun backend, aucune étape de build, aucun Node/npm, **aucune dépendance externe** (pas de CDN, pas de webfont). On sert le dossier et ça marche.
+- **HTML5** écrit à la main, **CSS local** dans `css/style.css` (CSS ordinaire, variables de thème dans `:root`). Pas de framework JS ni CSS.
+- JavaScript dans `js/app.js`, chargé avec `defer`, en **amélioration progressive**. Il gère : la bascule « CV classique » (mémorisée dans `localStorage`, forcée par `?classique` dans l'URL), le passage en vue classique à l'impression, la navigation par portails (portail bleu au clic, portail orange à l'arrivée), la barre de progression, la chambre courante dans la nav (`aria-current`) et la voix du narrateur. Sans JS, toutes les chambres restent affichées et lisibles et le lien PDF fonctionne : le contenu ne dépend jamais du script.
+- **Export PDF** : `cv-olivier-dutoit.pdf` est généré depuis la vue classique (voir « Régénérer le PDF »). Le régénérer et le commiter à chaque modification du contenu.
 
 ### Organisation du CSS
 
-- `css/style.css` est le seul fichier de style, dans cet ordre : variables `:root` (+ surcharge thème sombre), base, utilitaires, bureau, fenêtres, boutons, panneau, lanceur, écrans plein écran, démarrage, mode interactif `.js`, préférences d'accessibilité (`prefers-reduced-transparency`, `forced-colors`), impression.
-- Un utilitaire n'est ajouté que s'il est utilisé au moins deux fois ; sinon, écrire une règle sur le composant.
-- Toute couleur passe par une variable : jamais de code couleur en dur dans une règle de composant (sauf les pastilles `badge-*` et le terminal).
-- `@media print` doit rester fonctionnel : le CV s'imprime en une colonne, sans bureau ni panneau.
+- `css/style.css` est le seul fichier de style, dans cet ordre : variables `:root` (+ thème sombre), base, outils fixes, en-tête, chambres, composants, accueil, portails, final spatial, pied de page, points de rupture, couche JS (`.js`), vue classique (`html.classic`), préférences (`prefers-reduced-motion`, `forced-colors`), impression.
+- Toute couleur de composant passe par une variable. Exceptions assumées : décor (lune, Terre, métal, fenêtre d'observation) et vues à travers les portails.
+- La vue classique et `@media print` doivent rester fonctionnelles : CV sur une colonne, sans décor.
 
 ### Arborescence
 
 ```
 .
-├─ index.html          # la page (seule page du site)
-├─ css/
-│  └─ style.css        # variables de thème, utilitaires, composants (CSS ordinaire)
-├─ js/
-│  └─ app.js           # bureau interactif (amélioration progressive)
-├─ img/                # images optimisées (WebP/AVIF, ≤ 150–300 ko)
-├─ cv_base.md          # contenu source
-├─ grille_evaluation.md # grille de notation du sujet
+├─ index.html            # la page (seule page du site)
+├─ css/style.css         # thème, composants, vue classique, impression
+├─ js/app.js             # portails, narrateur, vue classique (amélioration progressive)
+├─ cv-olivier-dutoit.pdf # export PDF généré depuis la vue classique
+├─ cv_base.md            # contenu source
+├─ grille_evaluation.md  # grille de notation du sujet
+├─ robots.txt
 ├─ AGENTS.md
-├─ CLAUDE.md           # charge AGENTS.md
-└─ README.md           # consignes + section « Auto-évaluation »
+├─ CLAUDE.md             # charge AGENTS.md
+└─ README.md             # consignes + section « Auto-évaluation »
 ```
 
 ### Tester en local
 
-Ouvrir `index.html` directement, ou servir le dossier (`python -m http.server 8000`) pour tester comme en ligne. Aucune commande de build.
+Servir le dossier (`python -m http.server 8000`) puis ouvrir http://localhost:8000. Aucune commande de build.
+
+### Régénérer le PDF
+
+Serveur local lancé, depuis la racine du dépôt (PowerShell) :
+
+```powershell
+& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless=new --disable-gpu --no-pdf-header-footer --virtual-time-budget=3000 --print-to-pdf="$PWD\cv-olivier-dutoit.pdf" "http://localhost:8000/?classique"
+```
+
+Vérifier ensuite que le PDF ne contient ni e-mail, ni téléphone, ni adresse.
 
 ## Règles HTML
 
@@ -72,69 +77,53 @@ Ouvrir `index.html` directement, ou servir le dossier (`python -m http.server 80
 - Liens : textes explicites (jamais « cliquez ici »), `rel="noopener noreferrer"` sur les `target="_blank"`.
 - Indentation 2 espaces, attributs entre guillemets doubles, HTML valide W3C.
 
-## Direction artistique : bureau Linux moderne (inspiré de Kubuntu / KDE Plasma)
+## Direction artistique : chambres de test d'un laboratoire, fin dans l'espace
 
-Le site imite un bureau Linux contemporain à la manière de Kubuntu : fond d'écran clair aux formes abstraites, panneau sombre en bas avec lanceur d'applications, fenêtres plates aux coins légèrement arrondis avec barre de titre claire. Chaque section du CV est une **application** ouverte dans sa fenêtre. Le rendu doit être immédiatement reconnaissable, mais rester un CV lisible et sérieux : le bureau est le décor, pas le message.
+Hommage à l'esthétique des jeux de puzzle à portails (Portal 2) : le CV est un parcours de **chambres de test** numérotées 00 → 06. On arrive par l'ascenseur (accueil, chambre 00), on traverse une chambre par section du CV, puis le plafond de la dernière chambre est éventré et on sort **sur la Lune**, la Terre dans le ciel (contact, chambre 06). Le décor est poussé vers le réalisme, mais reste un décor : le CV doit rester lisible et sérieux.
 
-### Palette (déclarée dans `:root` de `css/style.css`)
+**Hommage, pas copie** : aucun logo, nom de marque, nom de personnage, réplique, texture ou son repris du jeu (pas de logo de l'entreprise fictive, pas de nom d'IA, pas de cube à cœur, pas de citation). Pictogrammes, textes du narrateur et formes sont originaux. Le pied de page mentionne l'hommage et l'absence d'affiliation.
 
-Thème **clair** type Breeze/Plasma 6 : fenêtres claires dont la barre de titre se fond dans la fenêtre (même couleur, pas de séparateur), panneau, lanceur et notifications en **verre clair translucide** (flou d'arrière-plan). En thème sombre, le verre devient sombre (`rgba(27,30,32,.72)`). Les libellés d'icônes du bureau suivent `--color-icon-label` : sombres sur le fond clair, blancs avec ombre sur le fond sombre ; le fond d'écran clair doit rester pâle (≥ 7:1 avec `#232629`).
+### Palette (dans `:root` de `css/style.css`)
 
 | Token | Valeur | Rôle |
 |---|---|---|
-| `--color-desktop-1` / `-2` / `-3` | `#b7d1ec` / `#f0d0cd` / `#dde8f3` | fond d'écran clair : dégradé bleu pâle → clair → corail pâle, deux halos blancs ; les libellés d'icônes (`--color-icon-label`) sont sombres dessus (≥ 7:1). En sombre : fond bleu nuit → bordeaux, libellés blancs avec ombre |
-| `--color-panel` | `rgba(239,240,241,.72)` | **verre clair** (`backdrop-filter` `--glass-blur`) pour le panneau, le lanceur et les notifications ; texte `#232629`, séparateurs `--color-panel-line`, champs `--color-panel-input` |
-| `--color-titlebar` | `#eff0f1` | barre de titre active (texte `#232629`) |
-| `--color-titlebar-inactive` | `#f7f7f8` | barre de titre inactive (texte `#5b6166`, ≥ 4,5:1) |
-| `--color-window` | `#eff0f1` | fond des fenêtres |
-| `--color-surface` | `#fcfcfc` | zones de contenu, cartes, chips, boutons |
-| `--color-border` | `#c2c7cc` | bordures fines, séparateurs |
-| `--color-text` | `#232629` | texte courant |
-| `--color-text-muted` | `#55606a` | dates, métadonnées (≥ 4,5:1 sur `window`) |
-| `--color-accent` | `#2980b9` | liens, focus, bouton principal (blanc dessus ≥ 4,5:1) |
-| `--color-accent-bright` | `#3daee9` | accents décoratifs seulement (soulignement de tâche active, survols) : trop clair pour du texte |
-| `--color-accent-soft` | `#d5ecf8` | survol de bouton |
-| `--color-danger` | `#da4453` | survol du bouton Fermer |
+| `--wall`, `--wall-seam`, `--wall-bevel` | `#e4e7ea`, joint sombre, biseau blanc | panneaux muraux de 96 px (`--tile`) avec joint, biseau et ombrage |
+| `--surface`, `--surface-2` | `#fff`, `#f3f5f6` | plaques vissées (`.panel`), étiquettes |
+| `--line` | `#c9d0d5` | bordures |
+| `--ink`, `--ink-muted` | `#1d2226`, `#4f5961` | texte (≥ 4,5:1 sur `wall` et `surface`) |
+| `--strip`, `--metal-1`, `--metal-2` | `#24292d`, `#2b3034`, `#171a1d` | en-tête, grilles de sol, cadres |
+| `--blue`, `--orange` | `#0b63b6`, `#a84a00` | accents **texte** (liens, étiquettes) |
+| `--btn-blue`, `--btn-orange` | mêmes valeurs, fixes | fonds de boutons : texte blanc ≥ 4,5:1 dans tous les thèmes |
+| `--portal-blue`, `--portal-orange` | `#27a7ff`, `#ff9d2e` | lumière des portails, champs d'énergie : **jamais de texte** |
+| `--space`, `--space-2`, `--space-ink` | `#03050a`, `#0b1122`, `#eef2f7` | final spatial |
 
-Les tokens sont neutres (`--color-accent`, pas `--color-breeze`) : la palette évoque l'ambiance, elle ne copie pas un thème existant.
+Thème sombre (`prefers-color-scheme`) : « aile désaffectée » du labo, panneaux sombres, accents texte éclaircis. La vue classique force le thème clair.
 
 ### Composants
 
-- **Fenêtre** (`section`) : fond `window`, coins arrondis 6 px, ombre portée (`--shadow-window`). Barre de titre **claire** (`titlebar`) sur une grille 3 colonnes : pastille d'icône à gauche, titre `h2` centré en 15 px semi-gras, et à droite trois boutons plats **réduire (chevron bas) / agrandir (chevron haut) / fermer (croix)**, décoratifs sans JS, fonctionnels avec JS (`<button>` étiquetés). Fermer passe en rouge `danger` au survol.
-- **Icônes d'application** : pastille carrée arrondie (`.app-badge`, 52 px sur le bureau, 24 px en barre de titre) de couleur unie (`badge-blue`, `badge-orange`, `badge-teal`, `badge-purple`, `badge-green`, `badge-red`, `badge-dark`) avec un pictogramme blanc à traits arrondis. Chaque application garde la même couleur partout (bureau, barre de titre, lanceur, panneau).
-- **Panneau** : `footer` fixé en bas, hauteur ≈ 46 px, fond `panel`. Sur bureau (≥ 768 px, JS), il est **flottant** (marge 8 px, coins arrondis 10 px, fond translucide `--color-panel-glass` avec `backdrop-filter`) tant qu'aucune fenêtre n'est agrandie ; dès qu'une fenêtre est agrandie, `html.has-maximized` l'ancre au bord (pleine largeur, opaque, sans arrondi). Il contient : le **bouton lanceur** (icône grille de points, sans texte), les **tâches** (icône + nom, soulignement `accent-bright` sous la fenêtre active), la **zone système** à droite (lien GitHub, horloge sur deux lignes heure / date, bouton « Afficher le bureau » qui réduit tout).
-- **Lanceur d'applications** : panneau sombre ancré au-dessus du bouton, largeur ≈ 640 px, sur trois zones : en-tête (avatar, nom d'utilisateur, champ de recherche qui filtre les applications, Entrée ouvre la première), corps à deux colonnes (raccourcis et liens externes à gauche, grille d'applications à droite), pied (Applications / Tout fermer / Quitter la session). Sur mobile, la colonne de gauche est masquée.
-- **Bureau** : icônes d'applications en colonne à gauche (pastille + libellé sombre), qui ouvrent la fenêtre correspondante.
-- **Boutons** : plats, coins arrondis 4 px, fond `surface` avec bordure `border` ; bouton principal fond `accent` texte blanc ; survol `accent-soft`. Pas de relief, pas de dégradé.
-- **Icônes** : SVG inline originaux (traits arrondis, `stroke: currentColor`), dans un sprite `<symbol>` en haut du `<body>`. **Aucune** icône, logo, fond d'écran ou nom de marque KDE, Kubuntu, Ubuntu ou Canonical (pas de logo Plasma/Kubuntu, pas d'engrenage KDE, pas de « cercle d'amis » Ubuntu, pas les mots « Kubuntu » ou « KDE » dans le contenu). Le style est un hommage, pas une copie.
-- **Cartes** : les expériences (`article.card`), les projets et la formation (`ul.card-list`) sont des cartes blanches `surface` à bordure fine et coins 6 px sur le fond `window`, comme les listes des applications Plasma. Les compétences sont des étiquettes (« chips ») ; pas de pourcentages inventés.
+- **Chambre** (`section.chamber`) : champ d'énergie bleu animé en haut (`::before`), grille de sol métallique en bas (`::after`).
+- **Panneau de chambre** (`.chamber-head`) : plaque rétroéclairée avec grand numéro fin (`.chamber-num`), kicker « Chambre de test 0X sur 06 », `h2`, barre de progression (`.sign-bar`, variable `--p`) et pictogrammes (`.sign-icons`).
+- **Plaques** (`.panel`) : cartes blanches à deux vis ; compétences en étiquettes (`.chips`), expériences en `article.card`, projets en `.card-list`, formation en `.timeline` numérotée.
+- **Portails** (`.portal` > `.portal-view` + SVG `<use href="#portal-rim">`) : bord en flamme par filtre SVG (`#f-rim` : turbulence animée, double halo), lumière projetée sur le mur, vue de l'autre côté avec récursion (on aperçoit l'autre portail au fond), montés en perspective sur les murs ; un portail est posé au sol sur la Lune.
+- **Accueil** : fenêtre de salle d'observation, deux portails face à face, cube au sol.
+- **Final** : brèche dans le plafond, étoiles sur deux couches, Terre éclairée de côté, cube à la dérive, sol lunaire SVG à cratères.
+- **Narrateur** (JS, ≥ 900 px, `aria-hidden`) : une phrase originale par chambre (`data-annonce`), ton pince-sans-rire, effacée après 7 s et en bas de page.
+- **Outils fixes** (`.view-tools`, en haut à gauche) : « Afficher le CV classique » (bouton `aria-pressed`, masqué sans JS) et « Exporter en PDF » (lien `download`).
 
 ### Typographie
 
-- Texte courant : police système sans-serif (`ui-sans-serif, system-ui, "Noto Sans", "DejaVu Sans", Arial, sans-serif`), **≥ 16 px**.
-- Barres de titre : 15–16 px, graisse 600 ; titres de sections `h3` : 17–18 px, graisse 600.
-- Pas de webfont : la police système suffit et préserve la performance.
+Police système sans-serif, texte ≥ 16 px. Numéros de chambre en graisse 200, titres en 650–800.
 
-### Contraintes d'accessibilité propres au style
+### Accessibilité propre au style
 
-- Texte `text` sur `window` (≈ 14:1) et blanc sur `panel` (≈ 17:1) sont conformes AAA ; `text-muted`, `titlebar-text-inactive` et `accent` sont calés pour ≥ 4,5:1 : ne pas les éclaircir. `accent-bright` (`#3daee9`) ne porte jamais de texte.
-- Les libellés des icônes du bureau sont en `text` sur le fond d'écran clair : garder le fond d'écran au-dessus de `#b9c3cf` pour rester ≥ 7:1.
-- La couleur seule ne signale jamais un état : la fenêtre active a aussi un titre plus foncé, la tâche active un soulignement.
-- `focus-visible:` : anneau `accent` de 2 px avec décalage 2 px, visible sur fond clair comme sombre (doubler d'un contour blanc sur le panneau).
-- Toute animation (ouverture de fenêtre, menu) reste ≤ 200 ms et respecte `prefers-reduced-motion`.
+- Aucune couleur `--portal-*` ne porte du texte. Ne pas éclaircir `--ink-muted`, `--blue`, `--orange`.
+- Focus : contour `--blue` 2 px + halo ; contour blanc sur fonds sombres (en-tête, espace).
+- Animations d'ambiance (champs, portails, étoiles, cube) coupées par `prefers-reduced-motion` ; la flamme SVG (SMIL) est mise en pause par `app.js`. Transitions d'interface ≤ 200 ms.
+- `forced-colors` : décor masqué, bordures `CanvasText`.
 
 ### Responsive
 
-- Mobile : pas d'icônes de bureau flottantes ; les applications sont listées en haut, les fenêtres s'empilent pleine largeur, le panneau reste en bas avec icônes seules.
-- `md:` et plus : bureau avec icônes à gauche, fenêtres positionnées librement (déplaçables avec JS) sans jamais dépasser l'écran.
-
-## Règles Tailwind / design
-
-- **Mobile-first** : styles de base pour mobile, puis `sm:` `md:` `lg:`. Aucun scroll horizontal.
-- Utilitaires Tailwind dans le HTML ; une classe dans `css/style.css` seulement pour un motif répété (fenêtre, biseau, bouton).
-- Couleurs, polices et espacements personnalisés définis une seule fois dans `:root` de `css/style.css`.
-- Accessibilité : contraste AA minimum (4,5:1 pour le texte), texte ≥ 16 px, focus visible (`focus-visible:` ring/outline), ordre de tabulation logique, `prefers-reduced-motion` respecté pour toute animation.
-- Sobre et lisible : blocs scannables, espacements réguliers, pas d'effets gratuits.
+Mobile-first, aucun scroll horizontal. Mobile : nav en grille, scène d'accueil sous le texte. ≥ 900 px : en-tête collant, nav en ligne, narrateur. ≥ 1360 px : les outils fixes tiennent dans la ligne de l'en-tête.
 
 ## Validation avant livraison
 
