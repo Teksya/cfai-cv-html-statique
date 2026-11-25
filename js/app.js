@@ -1,5 +1,6 @@
-// Progressive enhancement only: without this script every chamber is
-// still rendered and readable, it just loses the portal effects.
+// Progressive enhancement only. Without this script the CV is a normal
+// scrolling page with every chamber visible. With it, the CV becomes a
+// game: one level per screen, puzzles to solve, doors to the next level.
 (function () {
   'use strict';
 
@@ -7,41 +8,247 @@
   root.classList.add('js');
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-  // CSS cannot stop the SVG (SMIL) flicker of the portal rims: pause it here.
-  var sprite = document.querySelector('.sprite');
-  function syncSvgMotion() {
-    if (!sprite || !sprite.pauseAnimations) return;
-    if (reduceMotion.matches) sprite.pauseAnimations(); else sprite.unpauseAnimations();
-  }
-  syncSvgMotion();
-  if (reduceMotion.addEventListener) reduceMotion.addEventListener('change', syncSvgMotion);
   var header = document.querySelector('.site-header');
   var bar = document.querySelector('.test-progress-bar');
   var narrator = document.querySelector('.narrator');
   var narratorText = document.querySelector('.narrator-text');
   var chambers = Array.prototype.slice.call(document.querySelectorAll('.chamber'));
   var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-list a'));
-
-  // Classic view: plain one-column CV. Remembered per browser,
-  // forced by ?classique in the URL (used to generate the PDF).
   var toggle = document.getElementById('toggle-classic');
   var toggleLabel = toggle && toggle.querySelector('.tool-label');
+  var sprite = document.querySelector('.sprite');
+  var current = -1;
 
+  function isGame() { return root.classList.contains('game'); }
+  function chamberIndex(id) {
+    for (var i = 0; i < chambers.length; i++) if (chambers[i].id === id) return i;
+    return -1;
+  }
+
+  // ---------- Portal rim animation (SVG/SMIL: CSS cannot stop it) ----------
+  // Runs only on levels that show portals, and never with reduced motion.
+  function syncSvgMotion() {
+    if (!sprite || !sprite.pauseAnimations) return;
+    var portalVisible = !isGame() || current === 0 || current === chambers.length - 1;
+    if (reduceMotion.matches || !portalVisible) sprite.pauseAnimations();
+    else sprite.unpauseAnimations();
+  }
+  if (reduceMotion.addEventListener) reduceMotion.addEventListener('change', syncSvgMotion);
+
+  // ---------- Narrator ----------
+  var narratorTimer;
+  function say(text) {
+    if (!narrator || !text || !isGame()) return;
+    narrator.classList.add('is-hidden');
+    clearTimeout(narratorTimer);
+    narratorTimer = setTimeout(function () {
+      narratorText.textContent = text;
+      narrator.classList.remove('is-hidden');
+      narratorTimer = setTimeout(function () { narrator.classList.add('is-hidden'); }, 7000);
+    }, reduceMotion.matches ? 0 : 200);
+  }
+
+  // ---------- Levels ----------
+  function activate(index, moveFocus) {
+    current = index;
+    chambers.forEach(function (section, i) {
+      section.classList.toggle('is-active', i === index);
+      if (i !== index) section.classList.remove('is-in');
+    });
+    var section = chambers[index];
+    // next frame, so the panels fold out of the wall
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { section.classList.add('is-in'); });
+    });
+    navLinks.forEach(function (link) {
+      if (link.getAttribute('href') === '#' + section.id) link.setAttribute('aria-current', 'step');
+      else link.removeAttribute('aria-current');
+    });
+    if (bar) bar.style.width = (index / (chambers.length - 1) * 100) + '%';
+    root.classList.toggle('at-end', index === chambers.length - 1);
+    var room = section.querySelector('.room');
+    if (room) room.scrollTop = 0;
+    say(section.getAttribute('data-annonce'));
+    syncSvgMotion();
+    if (moveFocus) {
+      var heading = section.querySelector('h1, h2');
+      heading.setAttribute('tabindex', '-1');
+      heading.focus({ preventScroll: true });
+    }
+  }
+
+  var warp = document.createElement('div');
+  warp.className = 'warp';
+  warp.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(warp);
+  var warping = false;
+
+  // Level change: step through an orange portal opened where you clicked.
+  function goTo(index, options) {
+    options = options || {};
+    if (index < 0 || index >= chambers.length || index === current || warping) return;
+    if (options.push) history.pushState(null, '', '#' + chambers[index].id);
+    if (!isGame() || reduceMotion.matches) {
+      activate(index, options.focus);
+      return;
+    }
+    warping = true;
+    warp.style.setProperty('--x', (options.x || window.innerWidth / 2) + 'px');
+    warp.style.setProperty('--y', (options.y || window.innerHeight / 2) + 'px');
+    warp.classList.add('is-on');
+    setTimeout(function () {
+      activate(index, options.focus);
+      warp.classList.remove('is-on');
+      warping = false;
+    }, 260);
+  }
+
+  function indexFromHash() {
+    var i = chamberIndex(location.hash.slice(1));
+    return i < 0 ? 0 : i;
+  }
+
+  window.addEventListener('popstate', function () {
+    if (isGame()) goTo(indexFromHash(), { focus: true });
+  });
+
+  // Every in-page link to a chamber becomes a level change.
+  document.addEventListener('click', function (event) {
+    if (!isGame()) return;
+    var link = event.target.closest('a[href^="#"]');
+    if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    var index = chamberIndex(link.getAttribute('href').slice(1));
+    if (index < 0) return;
+    event.preventDefault();
+    goTo(index, { push: true, focus: true, x: event.clientX, y: event.clientY });
+  });
+
+  // ---------- Puzzles ----------
+  function finish(scene) {
+    var section = scene.closest('.chamber');
+    var exit = scene.querySelector('.exit-btn');
+    scene.classList.add('is-cleared');
+    exit.setAttribute('aria-label', 'Porte ouverte : passer au niveau suivant');
+    navLinks.forEach(function (link) {
+      if (link.getAttribute('href') === '#' + section.id) link.classList.add('is-solved');
+    });
+    var num = section.querySelector('.chamber-num');
+    say('Niveau ' + (num ? num.textContent : '') + ' terminé. La porte de sortie est ouverte.');
+    exit.focus({ preventScroll: true });
+  }
+
+  // Launch plate: the cube follows the dotted trajectory.
+  function launchCube(scene, done) {
+    var cube = scene.querySelector('.level-cube-ledge');
+    var svg = scene.querySelector('.launch-arc');
+    var path = svg.querySelector('path');
+    if (!cube.animate || !path.getPointAtLength || reduceMotion.matches) { done(); return; }
+    var box = svg.getBoundingClientRect();
+    var end = cube.getBoundingClientRect();
+    var length = path.getTotalLength();
+    var frames = [];
+    for (var i = 0; i <= 24; i++) {
+      var pt = path.getPointAtLength(length * i / 24);
+      var x = box.left + pt.x * box.width / 400 - (end.left + end.width / 2);
+      var y = box.top + pt.y * box.height / 120 - end.bottom;
+      frames.push({ transform: 'translate(' + x + 'px,' + y + 'px) rotate(' + (i * 15) + 'deg)', opacity: 1 });
+    }
+    frames.push({ transform: 'none', opacity: 1 });
+    cube.animate(frames, { duration: 900, easing: 'cubic-bezier(.3,.1,.6,1)' }).onfinish = function () {
+      scene.classList.add('is-cleared');
+      done();
+    };
+  }
+
+  var solvers = { formation: launchCube };
+
+  Array.prototype.forEach.call(document.querySelectorAll('.level-scene'), function (scene) {
+    var section = scene.closest('.chamber');
+    var trigger = scene.querySelector('.puzzle-btn');
+    var exit = scene.querySelector('.exit-btn');
+    trigger.hidden = false;
+    exit.hidden = false;
+    exit.setAttribute('aria-label', 'Porte verrouillée : résolvez l’énigme pour l’ouvrir');
+
+    trigger.addEventListener('click', function () {
+      if (scene.classList.contains('is-cleared') || scene.classList.contains('is-busy')) return;
+      scene.classList.add('is-busy');
+      function done() { scene.classList.remove('is-busy'); finish(scene); }
+      var solver = solvers[section.id];
+      if (solver) { solver(scene, done); return; }
+      // CSS transitions play the solution; open the door once they are done
+      scene.classList.add('is-cleared');
+      setTimeout(done, reduceMotion.matches ? 0 : 550);
+    });
+
+    exit.addEventListener('click', function (event) {
+      if (!scene.classList.contains('is-cleared') || scene.classList.contains('is-busy')) {
+        exit.classList.remove('is-locked');
+        void exit.offsetWidth; // restart the shake
+        exit.classList.add('is-locked');
+        say('Porte verrouillée. Résolvez l’énigme, ou passez par le menu des niveaux.');
+        return;
+      }
+      var rect = exit.getBoundingClientRect();
+      goTo(chamberIndex(section.id) + 1, {
+        push: true, focus: true,
+        x: event.clientX || rect.left + rect.width / 2,
+        y: event.clientY || rect.top + rect.height / 2
+      });
+    });
+  });
+
+  // Keyboard: arrows / PageUp / PageDown change level, E uses the puzzle.
+  document.addEventListener('keydown', function (event) {
+    if (!isGame() || event.altKey || event.ctrlKey || event.metaKey) return;
+    var tag = event.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (event.key === 'ArrowRight' || event.key === 'PageDown') {
+      goTo(current + 1, { push: true, focus: true });
+      event.preventDefault();
+    } else if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+      goTo(current - 1, { push: true, focus: true });
+      event.preventDefault();
+    } else if (event.key === 'e' || event.key === 'E') {
+      var trigger = chambers[current].querySelector('.puzzle-btn');
+      if (trigger) trigger.click();
+    }
+  });
+
+  // ---------- Classic view ----------
   function readPref() {
     try { return localStorage.getItem('cv-view') === 'classic'; } catch (e) { return false; }
   }
   function savePref(on) {
-    try { localStorage.setItem('cv-view', on ? 'classic' : 'chambers'); } catch (e) { /* storage blocked */ }
+    try { localStorage.setItem('cv-view', on ? 'classic' : 'game'); } catch (e) { /* storage blocked */ }
   }
+
+  // Classic view keeps a sticky header: anchored headings must clear it.
+  function syncHeaderHeight() {
+    var sticky = !isGame() && getComputedStyle(header).position === 'sticky';
+    root.style.setProperty('--header-h', sticky ? header.offsetHeight + 'px' : '0px');
+  }
+  window.addEventListener('resize', syncHeaderHeight);
+
   function setClassic(on) {
     root.classList.toggle('classic', on);
+    root.classList.toggle('game', !on);
     if (toggle) {
       toggle.setAttribute('aria-pressed', String(on));
-      toggleLabel.textContent = on ? 'Revenir au parcours de test' : 'Afficher le CV classique';
+      toggleLabel.textContent = on ? 'Revenir au mode jeu' : 'Afficher le CV classique';
     }
     if (narrator) narrator.classList.add('is-hidden');
     syncHeaderHeight();
+    if (on) {
+      chambers.forEach(function (section) { section.classList.add('is-in'); });
+      if (current > 0) chambers[current].scrollIntoView();
+      else window.scrollTo(0, 0);
+    } else {
+      var index = current < 0 ? 0 : current;
+      current = -1;
+      activate(index, false);
+    }
+    syncSvgMotion();
   }
 
   if (toggle) {
@@ -50,166 +257,22 @@
       var on = !root.classList.contains('classic');
       setClassic(on);
       savePref(on);
-      window.scrollTo(0, 0);
     });
   }
 
   // Printing (and "save as PDF") always uses the classic layout.
-  var classicBeforePrint = false;
+  var gameBeforePrint = false;
   window.addEventListener('beforeprint', function () {
-    classicBeforePrint = root.classList.contains('classic');
+    gameBeforePrint = isGame();
     root.classList.add('classic');
+    root.classList.remove('game');
   });
   window.addEventListener('afterprint', function () {
-    if (!classicBeforePrint) root.classList.remove('classic');
+    if (!gameBeforePrint) return;
+    root.classList.remove('classic');
+    root.classList.add('game');
   });
 
-  // Sticky header must not hide anchored headings.
-  function syncHeaderHeight() {
-    var sticky = getComputedStyle(header).position === 'sticky';
-    root.style.setProperty('--header-h', sticky ? header.offsetHeight + 'px' : '0px');
-  }
-  window.addEventListener('resize', syncHeaderHeight);
+  current = indexFromHash();
   setClassic(/[?&]classique\b/.test(location.search) || readPref());
-
-  // Scroll progress across the whole test.
-  var ticking = false;
-  function updateProgress() {
-    ticking = false;
-    var max = document.documentElement.scrollHeight - window.innerHeight;
-    var ratio = max > 0 ? Math.min(1, window.scrollY / max) : 0;
-    if (bar) bar.style.width = (ratio * 100).toFixed(1) + '%';
-    // Keep the footer readable: the narrator steps aside at the very end.
-    if (narrator && ratio > .97) narrator.classList.add('is-hidden');
-  }
-  window.addEventListener('scroll', function () {
-    if (!ticking) { ticking = true; requestAnimationFrame(updateProgress); }
-  }, { passive: true });
-  updateProgress();
-
-  // Current chamber: nav highlight and narrator line.
-  var current = null;
-  var narratorTimer;
-  function enterChamber(section) {
-    if (section === current) return;
-    current = section;
-    navLinks.forEach(function (link) {
-      if (link.getAttribute('href') === '#' + section.id) link.setAttribute('aria-current', 'true');
-      else link.removeAttribute('aria-current');
-    });
-    say(null);
-  }
-
-  // Narrator: a line for the current chamber, or a one-off line.
-  function say(text) {
-    if (!narrator || root.classList.contains('classic')) return;
-    narrator.classList.add('is-hidden');
-    clearTimeout(narratorTimer);
-    // Read the line when the timer fires: fast jumps must show the last chamber.
-    narratorTimer = setTimeout(function () {
-      var line = text || (current && current.getAttribute('data-annonce'));
-      if (!line) return;
-      narratorText.textContent = line;
-      narrator.classList.remove('is-hidden');
-      // Fade out so the line never sits on top of the content for long.
-      narratorTimer = setTimeout(function () { narrator.classList.add('is-hidden'); }, 7000);
-    }, reduceMotion.matches ? 0 : 200);
-  }
-
-  // Levels: panels fold out when a chamber comes into view, and the
-  // puzzle is solved (door opens) when the reader reaches its end.
-  var scenes = Array.prototype.slice.call(document.querySelectorAll('.level-scene'));
-  if ('IntersectionObserver' in window) {
-    var entering = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-in');
-        entering.unobserve(entry.target);
-      });
-    }, { rootMargin: '0px 0px -12% 0px' });
-    chambers.forEach(function (section) { entering.observe(section); });
-
-    var solving = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        var scene = entry.target;
-        solving.unobserve(scene);
-        setTimeout(function () { scene.classList.add('is-cleared'); }, reduceMotion.matches ? 0 : 250);
-        var num = scene.closest('.chamber').querySelector('.chamber-num');
-        if (num) say('Niveau ' + num.textContent + ' terminé. La porte de sortie est ouverte.');
-      });
-    }, { threshold: .8 });
-    scenes.forEach(function (scene) { solving.observe(scene); });
-
-    // The animated portal rims cost CPU: run them only while a portal is on screen.
-    var portalsOnScreen = 0;
-    var watching = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) { portalsOnScreen += entry.isIntersecting ? 1 : -1; });
-      portalsOnScreen = Math.max(0, portalsOnScreen);
-      if (!sprite || !sprite.pauseAnimations || reduceMotion.matches) return;
-      if (portalsOnScreen) sprite.unpauseAnimations(); else sprite.pauseAnimations();
-    });
-    Array.prototype.forEach.call(document.querySelectorAll('.hero-scene, .space-sky'), function (el) { watching.observe(el); });
-  } else {
-    chambers.forEach(function (section) { section.classList.add('is-in'); });
-    scenes.forEach(function (scene) { scene.classList.add('is-cleared'); });
-  }
-
-  if ('IntersectionObserver' in window) {
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) enterChamber(entry.target);
-      });
-    }, { rootMargin: '-45% 0px -50% 0px' });
-    chambers.forEach(function (section) { observer.observe(section); });
-  } else if (chambers.length) {
-    enterChamber(chambers[0]);
-  }
-
-  // In-page links teleport: blue portal where you click, orange portal
-  // where you land. Plain anchor jump when motion is reduced.
-  function spawnPortal(color, x, y) {
-    var fx = document.createElement('span');
-    fx.className = 'portal-fx';
-    fx.setAttribute('aria-hidden', 'true');
-    fx.innerHTML = '<span class="portal portal-' + color + '"><span class="portal-view"></span>' +
-      '<svg class="portal-rim" viewBox="0 0 140 240"><use href="#portal-rim"/></svg></span>';
-    fx.style.left = x + 'px';
-    fx.style.top = y + 'px';
-    document.body.appendChild(fx);
-    return fx;
-  }
-
-  function closePortal(fx) {
-    fx.classList.add('is-closing');
-    fx.addEventListener('animationend', function () { fx.remove(); }, { once: true });
-  }
-
-  document.addEventListener('click', function (event) {
-    var link = event.target.closest('a[href^="#"]');
-    if (!link || link.classList.contains('skip-link') || reduceMotion.matches) return;
-    if (root.classList.contains('classic')) return;
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    var target = document.getElementById(link.getAttribute('href').slice(1));
-    if (!target) return;
-    event.preventDefault();
-
-    var rect = link.getBoundingClientRect();
-    var x = event.clientX || rect.left + rect.width / 2;
-    var y = event.clientY || rect.top + rect.height / 2;
-    var entry = spawnPortal('blue', x, y);
-
-    setTimeout(function () {
-      target.scrollIntoView({ block: 'start' });
-      history.pushState(null, '', '#' + target.id);
-      var heading = target.querySelector('h1, h2') || target;
-      heading.setAttribute('tabindex', '-1');
-      heading.focus({ preventScroll: true });
-
-      var box = heading.getBoundingClientRect();
-      var exit = spawnPortal('orange', box.left - 30 > 40 ? box.left - 30 : 40, box.top + box.height / 2);
-      closePortal(entry);
-      setTimeout(function () { closePortal(exit); }, 200);
-    }, 180);
-  });
 })();

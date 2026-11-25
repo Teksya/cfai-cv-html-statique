@@ -109,6 +109,9 @@ sup { line-height: 0; }
   box-shadow: 0 0 0 4px var(--surface);
 }
 
+/* headings focused by script after a level change: no ring needed */
+h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: none; }
+
 .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 .icon {
   width: 1.25em; height: 1.25em; flex: none;
@@ -598,12 +601,6 @@ sup { line-height: 0; }
 /* ---------- JS layer (progressive enhancement) ---------- */
 @media (min-width: 900px) {
   .js .site-header { position: sticky; top: 0; }
-  .js .test-progress { display: block; height: 3px; background: #000; }
-  .js .test-progress-bar {
-    display: block; height: 100%; width: 0;
-    background: linear-gradient(90deg, var(--portal-blue), var(--portal-orange));
-    transition: width .2s linear;
-  }
   .js .narrator {
     display: flex; align-items: center; gap: 12px;
     position: fixed; left: 16px; bottom: 16px; z-index: 30;
@@ -651,7 +648,8 @@ sup { line-height: 0; }
   position: relative; height: 150px; margin: 72px 0 calc(16px - var(--pad-b));
   pointer-events: none;
 }
-.level-scene > * { position: absolute; }
+.scene-decor { position: absolute; inset: 0; }
+.scene-decor > * { position: absolute; }
 .level-scene .icon { width: 28px; height: 28px; }
 
 /* exit door with its status sign */
@@ -815,31 +813,154 @@ sup { line-height: 0; }
 .level-profil .wire { --from: 70%; }
 
 /* unsolved state, only when JS can solve it */
-.js .level-scene:not(.is-cleared) .exit-door span { transform: none; }
-.js .level-scene:not(.is-cleared) .exit-sign { color: #5b636a; box-shadow: none; }
-.js .level-scene:not(.is-cleared) .wire { color: #8b98a3; }
-.js .level-competences:not(.is-cleared) .level-cube { transform: translateY(-92px); }
-.js .level-competences:not(.is-cleared) .floor-button::before { background: #8a2a20; box-shadow: none; }
-.js .level-experiences:not(.is-cleared) .light-bridge { transform: scaleX(0); }
-.js .level-projets:not(.is-cleared) .laser-beam { transform: scaleX(.3); }
-.js .level-projets:not(.is-cleared) .laser-catcher::after { background: #5b2a27; box-shadow: none; }
-.js .level-formation:not(.is-cleared) .launch-arc path { opacity: 0; }
-.js .level-formation:not(.is-cleared) .level-cube-ledge { opacity: 0; transform: translateY(-40px); }
-.js .level-profil:not(.is-cleared) .gel { transform: scaleX(0); }
+.game .level-scene:not(.is-cleared) .exit-door span { transform: none; }
+.game .level-scene:not(.is-cleared) .exit-sign { color: #5b636a; box-shadow: none; }
+.game .level-scene:not(.is-cleared) .wire { color: #8b98a3; }
+.game .level-competences:not(.is-cleared) .level-cube { transform: translateY(-92px); }
+.game .level-competences:not(.is-cleared) .floor-button::before { background: #8a2a20; box-shadow: none; }
+.game .level-experiences:not(.is-cleared) .light-bridge { transform: scaleX(0); }
+.game .level-projets:not(.is-cleared) .laser-beam { transform: rotate(-28deg) scaleX(.5); }
+.game .level-projets:not(.is-cleared) .laser-catcher::after { background: #5b2a27; box-shadow: none; }
+.game .level-formation:not(.is-cleared) .launch-arc path { opacity: .3; }
+.game .level-formation:not(.is-cleared) .level-cube-ledge { opacity: 0; }
+.game .level-profil:not(.is-cleared) .gel { transform: scaleX(0); }
 
 /* chamber panels fold out of the walls when a level starts */
 @media (prefers-reduced-motion: no-preference) {
-  .js:not(.classic) .chamber .panel {
+  .game .chamber .panel {
     transition: transform .5s cubic-bezier(.2, .8, .2, 1), opacity .35s ease-out;
   }
-  .js:not(.classic) .chamber:not(.is-in) .panel {
+  .game .chamber:not(.is-in) .panel {
     opacity: 0; transform: perspective(1200px) rotateX(-32deg) translateY(28px); transform-origin: 50% 100%;
   }
-  .js .chamber .panel:nth-child(2) { transition-delay: .06s; }
-  .js .chamber .panel:nth-child(3) { transition-delay: .12s; }
-  .js .chamber .panel:nth-child(4) { transition-delay: .18s; }
-  .js .chamber .panel:nth-child(5) { transition-delay: .24s; }
-  .js .chamber .panel:nth-child(6) { transition-delay: .3s; }
+  .game .chamber .panel:nth-child(2) { transition-delay: .06s; }
+  .game .chamber .panel:nth-child(3) { transition-delay: .12s; }
+  .game .chamber .panel:nth-child(4) { transition-delay: .18s; }
+  .game .chamber .panel:nth-child(5) { transition-delay: .24s; }
+  .game .chamber .panel:nth-child(6) { transition-delay: .3s; }
+}
+
+/* ---------- Game mode (JS, not classic): one level per screen ----------
+   No page scroll: the header stays, the active chamber fills the rest of
+   the screen, its content scrolls inside .room if it has to. */
+.game body {
+  height: 100vh; height: 100dvh; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.game .site-header { flex: none; position: relative; }
+.game main { flex: 1; min-height: 0; position: relative; }
+.game main:focus { outline: none; }
+.game .chamber { position: absolute; inset: 0; padding: 0; display: none; overflow: hidden; }
+.game .chamber.is-active { display: block; }
+.game .chamber-inner { height: 100%; display: flex; flex-direction: column; padding-top: 34px; }
+.game .chamber-head { flex: none; margin-bottom: 12px; padding: 10px 14px; }
+.game .chamber-num { font-size: 2.75rem; }
+.game .room {
+  flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  margin: 0 -8px; padding: 4px 8px 20px;
+  /* fade at the bottom hints that the room scrolls */
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 22px), transparent);
+  mask-image: linear-gradient(#000 calc(100% - 22px), transparent);
+  scrollbar-width: thin; scrollbar-color: var(--ink-muted) transparent;
+}
+.game .level-scene { flex: none; height: 132px; margin: 6px 0 16px; }
+.game .dropper, .game .gel-pipe { top: -4px; }
+.game .hero-grid { overflow-x: hidden; }
+
+.game .hero .chamber-inner { padding-top: 16px; }
+.game .hero-grid { flex: 1; min-height: 0; overflow-y: auto; align-content: center; }
+.game .space .chamber-inner { padding-top: 96px; }
+.game .site-footer { display: none; }
+.game.at-end .site-footer {
+  display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+  padding: 8px 16px; background: rgba(30, 33, 36, .88);
+}
+.game.at-end .site-footer p:nth-child(2) { display: none; }
+
+.game .test-progress { display: block; height: 3px; background: #000; }
+.game .test-progress-bar {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--portal-blue), var(--portal-orange));
+  transition: width .3s ease-out;
+}
+.nav-list a.is-solved .nav-num { background: var(--portal-orange); color: #1d2226; border-color: var(--portal-orange); }
+
+/* in-world prompts */
+.puzzle-btn, .exit-btn {
+  position: absolute; z-index: 3; cursor: pointer; pointer-events: auto; font: 650 .9375rem/1.2 var(--font);
+}
+.puzzle-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 12px 6px 6px;
+  border-radius: 20px; border: 1px solid #000; background: rgba(20, 24, 28, .92); color: #fff;
+  box-shadow: 0 0 0 0 rgba(39, 167, 255, .7);
+  animation: prompt 1.6s ease-out infinite;
+}
+.puzzle-btn:hover { background: #0b3f73; }
+.puzzle-btn .key {
+  width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%;
+  background: #fff; color: #1d2226; font-weight: 800;
+}
+@keyframes prompt { to { box-shadow: 0 0 0 12px rgba(39, 167, 255, 0); } }
+.pb-competences { left: calc(26% - 50px); top: 8px; }
+.pb-experiences { left: calc(32% - 60px); top: 30px; }
+.pb-projets { left: 2%; top: 6px; }
+.pb-formation { left: 6%; top: 40px; }
+.pb-profil { left: 18%; top: 34px; }
+.is-cleared .puzzle-btn { display: none; }
+
+.exit-btn {
+  right: 2%; bottom: 0; width: 78px; height: 132px; padding: 0;
+  background: transparent; border: 0; border-radius: 10px 10px 0 0;
+}
+.exit-label {
+  position: absolute; right: 0; bottom: 140px; white-space: nowrap;
+  padding: 4px 10px; border-radius: 4px; background: var(--btn-orange); color: #fff;
+  opacity: 0; transform: translateY(6px); transition: opacity .2s, transform .2s;
+}
+.is-cleared .exit-label { opacity: 1; transform: none; }
+.exit-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+.exit-btn.is-locked { animation: locked .3s; }
+@keyframes locked { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+/* level change: step through an orange portal */
+.warp {
+  position: fixed; inset: 0; z-index: 95; pointer-events: none; overflow: hidden;
+  background: rgba(255, 246, 230, 0); transition: background .22s ease-in;
+}
+.warp::before {
+  content: ""; position: absolute; left: var(--x, 50%); top: var(--y, 50%);
+  width: 120px; height: 200px; margin: -100px 0 0 -60px; border-radius: 50%;
+  border: 8px solid var(--portal-orange); background: radial-gradient(ellipse, #fff 30%, #ffd9a3 70%);
+  box-shadow: 0 0 40px 12px var(--portal-orange), inset 0 0 30px var(--portal-orange);
+  transform: scale(0); transition: transform .26s cubic-bezier(.55, 0, .9, .45);
+}
+.warp.is-on { background: rgba(255, 246, 230, .9); }
+.warp.is-on::before { transform: scale(18); }
+
+@media (max-width: 899px) {
+  .game .header-inner { padding-top: 6px; padding-bottom: 6px; }
+  .game .brand { display: none; }
+  .game .nav-list { display: flex; justify-content: space-between; gap: 4px; }
+  .game .nav-list a { min-width: 44px; justify-content: center; padding: 4px 6px; }
+}
+@media (max-width: 639px) {
+  .game .nav-label {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+}
+@media (max-width: 899px) {
+  .game .chamber-inner { padding-top: 28px; }
+  .game .chamber-head { padding: 8px 12px; gap: 12px; }
+  .game .chamber-num { font-size: 2.25rem; padding-right: 12px; }
+  .game .chamber-title h2 { font-size: 1.375rem; }
+  .game .sign-icons { display: none; }
+  .game .hero-scene { min-height: 260px; }
+}
+
+@media (min-width: 900px) {
+  .game .level-scene { height: 150px; }
+  .game .exit-btn { height: 132px; }
 }
 
 /* ---------- Classic view (toggle, PDF export, printing) ----------

@@ -95,12 +95,12 @@
       </a>
       <nav class="site-nav" aria-label="Chambres du CV">
         <ol class="nav-list">
-          <li><a href="#competences"><span class="nav-num" aria-hidden="true">01</span> Compétences</a></li>
-          <li><a href="#experiences"><span class="nav-num" aria-hidden="true">02</span> Expériences</a></li>
-          <li><a href="#projets"><span class="nav-num" aria-hidden="true">03</span> Projets</a></li>
-          <li><a href="#formation"><span class="nav-num" aria-hidden="true">04</span> Formation</a></li>
-          <li><a href="#profil"><span class="nav-num" aria-hidden="true">05</span> Profil</a></li>
-          <li><a href="#contact"><span class="nav-num" aria-hidden="true">06</span> Contact</a></li>
+          <li><a href="#competences"><span class="nav-num" aria-hidden="true">01</span> <span class="nav-label">Compétences</span></a></li>
+          <li><a href="#experiences"><span class="nav-num" aria-hidden="true">02</span> <span class="nav-label">Expériences</span></a></li>
+          <li><a href="#projets"><span class="nav-num" aria-hidden="true">03</span> <span class="nav-label">Projets</span></a></li>
+          <li><a href="#formation"><span class="nav-num" aria-hidden="true">04</span> <span class="nav-label">Formation</span></a></li>
+          <li><a href="#profil"><span class="nav-num" aria-hidden="true">05</span> <span class="nav-label">Profil</span></a></li>
+          <li><a href="#contact"><span class="nav-num" aria-hidden="true">06</span> <span class="nav-label">Contact</span></a></li>
         </ol>
       </nav>
     </div>
@@ -110,7 +110,7 @@
   <main id="contenu" tabindex="-1">
 
     <!-- Chamber 00: the arrival lift, holds the h1 -->
-    <section id="accueil" class="chamber hero" aria-labelledby="titre-accueil" data-annonce="Bienvenue dans le programme d'évaluation des alternants. Gardez les bras à l'intérieur de l'ascenseur.">
+    <section id="accueil" class="chamber hero" aria-labelledby="titre-accueil" data-annonce="Bienvenue dans le programme d'évaluation des alternants. Six niveaux vous attendent. Gardez les bras à l'intérieur de l'ascenseur.">
       <div class="chamber-inner hero-grid">
         <div class="hero-text">
           <p class="kicker">Sujet de test · Saint-Étienne</p>
@@ -138,7 +138,7 @@
       </div>
     </section>
 
-    <section id="competences" class="chamber" aria-labelledby="titre-competences" data-annonce="Chambre 01 : inventaire des compétences. Aucune n'a été inventée pour les besoins du test.">
+    <section id="competences" class="chamber" aria-labelledby="titre-competences" data-annonce="Niveau 01 : inventaire des compétences. Aucune n'a été inventée pour les besoins du test.">
       <div class="chamber-inner">
         <div class="chamber-head">
           <p class="chamber-num" aria-hidden="true">01</p>
@@ -149,82 +149,87 @@
             <ul class="sign-icons" aria-hidden="true"><li><svg class="icon"><use href="#i-server"/></svg></li><li><svg class="icon"><use href="#i-network"/></svg></li><li><svg class="icon"><use href="#i-layers"/></svg></li><li><svg class="icon"><use href="#i-shield"/></svg></li></ul>
           </div>
         </div>
-
-        <div class="grid-3">
-          <article class="panel">
-            <h3><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg> Systèmes et infrastructures</h3>
-            <ul class="chips">
-              <li>Windows Server 2016 / 2019 / 2022</li>
-              <li>Debian, Ubuntu, Kali</li>
-              <li>Active Directory, GPO, droits</li>
-              <li>PowerShell, Bash</li>
-              <li>DNS, mail</li>
-              <li>NAS OpenMediaVault, SMB/NFS, RAID</li>
-              <li>Nextcloud</li>
-            </ul>
-          </article>
-          <article class="panel">
-            <h3><svg class="icon" aria-hidden="true"><use href="#i-network"/></svg> Réseaux</h3>
-            <ul class="chips">
-              <li>VLAN, routage</li>
-              <li>Pare-feu, VPN</li>
-              <li>Cisco IOS</li>
-              <li>Mikrotik RouterOS</li>
-              <li>HP Aruba</li>
-              <li>Wireshark</li>
-            </ul>
-          </article>
-          <article class="panel">
-            <h3><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> Virtualisation et conteneurs</h3>
-            <ul class="chips">
-              <li>Proxmox VE (KVM)</li>
-              <li>Docker</li>
-            </ul>
-          </article>
-          <article class="panel">
-            <h3><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> Sécurité et supervision</h3>
-            <ul class="chips">
-              <li>fail2ban</li>
-              <li>Centralisation des logs SSH</li>
-              <li>Monitoring Proxmox</li>
-              <li>Alertes webhook et e-mail</li>
-            </ul>
-          </article>
-          <article class="panel">
-            <h3><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg> Développement et outils</h3>
-            <ul class="chips">
-              <li>JavaScript, Node.js (Express, EJS)</li>
-              <li>PHP, Python, C#</li>
-              <li>HTML / CSS, Tailwind CSS</li>
-              <li>Flutter / Dart</li>
-              <li>SQLite, MySQL</li>
-              <li>Git, Figma, Canva</li>
-            </ul>
-          </article>
-          <article class="panel">
-            <h3><svg class="icon" aria-hidden="true"><use href="#i-headset"/></svg> Support et méthode</h3>
-            <ul class="chips">
-              <li>Support utilisateurs, sur site et à distance</li>
-              <li>Diagnostic et résolution d'incidents</li>
-              <li>Autonomie</li>
-              <li>Veille technologique</li>
-            </ul>
-          </article>
+        <div class="room">
+          <div class="grid-3">
+            <article class="panel">
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg> Systèmes et infrastructures</h3>
+              <ul class="chips">
+                <li>Windows Server 2016 / 2019 / 2022</li>
+                <li>Debian, Ubuntu, Kali</li>
+                <li>Active Directory, GPO, droits</li>
+                <li>PowerShell, Bash</li>
+                <li>DNS, mail</li>
+                <li>NAS OpenMediaVault, SMB/NFS, RAID</li>
+                <li>Nextcloud</li>
+              </ul>
+            </article>
+            <article class="panel">
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-network"/></svg> Réseaux</h3>
+              <ul class="chips">
+                <li>VLAN, routage</li>
+                <li>Pare-feu, VPN</li>
+                <li>Cisco IOS</li>
+                <li>Mikrotik RouterOS</li>
+                <li>HP Aruba</li>
+                <li>Wireshark</li>
+              </ul>
+            </article>
+            <article class="panel">
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> Virtualisation et conteneurs</h3>
+              <ul class="chips">
+                <li>Proxmox VE (KVM)</li>
+                <li>Docker</li>
+              </ul>
+            </article>
+            <article class="panel">
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> Sécurité et supervision</h3>
+              <ul class="chips">
+                <li>fail2ban</li>
+                <li>Centralisation des logs SSH</li>
+                <li>Monitoring Proxmox</li>
+                <li>Alertes webhook et e-mail</li>
+              </ul>
+            </article>
+            <article class="panel">
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg> Développement et outils</h3>
+              <ul class="chips">
+                <li>JavaScript, Node.js (Express, EJS)</li>
+                <li>PHP, Python, C#</li>
+                <li>HTML / CSS, Tailwind CSS</li>
+                <li>Flutter / Dart</li>
+                <li>SQLite, MySQL</li>
+                <li>Git, Figma, Canva</li>
+              </ul>
+            </article>
+            <article class="panel">
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-headset"/></svg> Support et méthode</h3>
+              <ul class="chips">
+                <li>Support utilisateurs, sur site et à distance</li>
+                <li>Diagnostic et résolution d'incidents</li>
+                <li>Autonomie</li>
+                <li>Veille technologique</li>
+              </ul>
+            </article>
+          </div>
         </div>
-        <div class="level-scene level-competences" aria-hidden="true">
-          <span class="dropper"></span>
-          <span class="level-cube"><svg class="icon"><use href="#i-cube"/></svg></span>
-          <span class="floor-button"></span>
-          <span class="wire"></span>
-          <span class="exit">
-            <span class="exit-sign"><svg class="icon"><use href="#i-check"/></svg></span>
-            <span class="exit-door"><span></span><span></span></span>
-          </span>
+        <div class="level-scene level-competences">
+          <div class="scene-decor" aria-hidden="true">
+            <span class="dropper"></span>
+            <span class="level-cube"><svg class="icon"><use href="#i-cube"/></svg></span>
+            <span class="floor-button"></span>
+            <span class="wire"></span>
+            <span class="exit">
+              <span class="exit-sign"><svg class="icon"><use href="#i-check"/></svg></span>
+              <span class="exit-door"><span></span><span></span></span>
+            </span>
+          </div>
+          <button type="button" class="puzzle-btn pb-competences" hidden><span class="key" aria-hidden="true">E</span> Lâcher le cube</button>
+          <button type="button" class="exit-btn" hidden><span class="exit-label">Niveau suivant</span></button>
         </div>
       </div>
     </section>
 
-    <section id="experiences" class="chamber" aria-labelledby="titre-experiences" data-annonce="Chambre 02 : expériences. Le sujet a traversé cinq stages et une alternance. Les résultats sont encourageants.">
+    <section id="experiences" class="chamber" aria-labelledby="titre-experiences" data-annonce="Niveau 02 : expériences. Le sujet a traversé cinq stages et une alternance. Les résultats sont encourageants.">
       <div class="chamber-inner">
         <div class="chamber-head">
           <p class="chamber-num" aria-hidden="true">02</p>
@@ -235,68 +240,73 @@
             <ul class="sign-icons" aria-hidden="true"><li><svg class="icon"><use href="#i-briefcase"/></svg></li><li><svg class="icon"><use href="#i-headset"/></svg></li><li><svg class="icon"><use href="#i-server"/></svg></li><li><svg class="icon"><use href="#i-user"/></svg></li></ul>
           </div>
         </div>
+        <div class="room">
+          <div class="grid-2">
+            <article class="panel card">
+              <p class="card-meta"><span class="tag tag-orange">Alternance</span> Depuis <time datetime="2026-08">août 2026</time></p>
+              <h3>Alternant — Bernard Bonnefond</h3>
+              <ul class="dash-list">
+                <li>Script de mise à jour des postes déployé par GPO (PowerShell, PSUpdate)</li>
+                <li>Journalisation locale pour suivre l'état de chaque poste</li>
+                <li>Mise en place de GLPI et inventaire du parc informatique</li>
+              </ul>
+            </article>
+            <article class="panel card">
+              <p class="card-meta"><span class="tag">Stage</span> <time datetime="2025-09">Sept.</time> – <time datetime="2025-10">oct. 2025</time></p>
+              <h3>Stagiaire — MFR Marlhes</h3>
+              <ul class="dash-list">
+                <li>Système d'affichage dynamique multiplateforme</li>
+                <li>API sécurisée et clients Android et Windows</li>
+                <li>Support et accompagnement des utilisateurs</li>
+              </ul>
+            </article>
+            <article class="panel card">
+              <p class="card-meta"><span class="tag">Stage</span> <time datetime="2024-11">Nov.</time> – <time datetime="2024-12">déc. 2024</time></p>
+              <h3>Stagiaire — MFR Marlhes</h3>
+              <ul class="dash-list">
+                <li>Installation et configuration d'un switch Cisco</li>
+                <li>Création et administration de VM Debian</li>
+                <li>Support utilisateur</li>
+              </ul>
+            </article>
+            <article class="panel card">
+              <p class="card-meta"><span class="tag">Stage</span> <time datetime="2023-04">Avr.</time> – <time datetime="2023-06">juin 2023</time></p>
+              <h3>Stagiaire — SIMMAV, IUT de Saint-Étienne</h3>
+              <ul class="dash-list">
+                <li>Comptes et permissions Active Directory</li>
+                <li>Déploiement de postes de travail</li>
+                <li>Projets web et maquettes Figma</li>
+              </ul>
+            </article>
+          </div>
 
-        <div class="grid-2">
-          <article class="panel card">
-            <p class="card-meta"><span class="tag tag-orange">Alternance</span> Depuis <time datetime="2026-08">août 2026</time></p>
-            <h3>Alternant — Bernard Bonnefond</h3>
-            <ul class="dash-list">
-              <li>Script de mise à jour des postes déployé par GPO (PowerShell, PSUpdate)</li>
-              <li>Journalisation locale pour suivre l'état de chaque poste</li>
-              <li>Mise en place de GLPI et inventaire du parc informatique</li>
+          <div class="panel panel-flat">
+            <h3>Autres expériences</h3>
+            <ul class="compact-list">
+              <li><strong>Stagiaire — MFR Marlhes</strong> <span class="muted">(<time datetime="2025-06">juin</time> – <time datetime="2025-07">juil. 2025</time>)</span> : assistance technique, incidents matériels et logiciels.</li>
+              <li><strong>Stagiaire — SIMMAV, IUT de Saint-Étienne</strong> <span class="muted">(<time datetime="2023-11">nov.</time> – <time datetime="2023-12">déc. 2023</time>)</span> : surveillance réseau, déploiement de logiciels, support.</li>
+              <li><strong>Bénévole support informatique — YorkHost</strong> <span class="muted">(<time datetime="2023-03">mars</time> – <time datetime="2023-11">nov. 2023</time>, à distance)</span> : assistance aux utilisateurs de services d'hébergement web.</li>
             </ul>
-          </article>
-          <article class="panel card">
-            <p class="card-meta"><span class="tag">Stage</span> <time datetime="2025-09">Sept.</time> – <time datetime="2025-10">oct. 2025</time></p>
-            <h3>Stagiaire — MFR Marlhes</h3>
-            <ul class="dash-list">
-              <li>Système d'affichage dynamique multiplateforme</li>
-              <li>API sécurisée et clients Android et Windows</li>
-              <li>Support et accompagnement des utilisateurs</li>
-            </ul>
-          </article>
-          <article class="panel card">
-            <p class="card-meta"><span class="tag">Stage</span> <time datetime="2024-11">Nov.</time> – <time datetime="2024-12">déc. 2024</time></p>
-            <h3>Stagiaire — MFR Marlhes</h3>
-            <ul class="dash-list">
-              <li>Installation et configuration d'un switch Cisco</li>
-              <li>Création et administration de VM Debian</li>
-              <li>Support utilisateur</li>
-            </ul>
-          </article>
-          <article class="panel card">
-            <p class="card-meta"><span class="tag">Stage</span> <time datetime="2023-04">Avr.</time> – <time datetime="2023-06">juin 2023</time></p>
-            <h3>Stagiaire — SIMMAV, IUT de Saint-Étienne</h3>
-            <ul class="dash-list">
-              <li>Comptes et permissions Active Directory</li>
-              <li>Déploiement de postes de travail</li>
-              <li>Projets web et maquettes Figma</li>
-            </ul>
-          </article>
+          </div>
         </div>
-
-        <div class="panel panel-flat">
-          <h3>Autres expériences</h3>
-          <ul class="compact-list">
-            <li><strong>Stagiaire — MFR Marlhes</strong> <span class="muted">(<time datetime="2025-06">juin</time> – <time datetime="2025-07">juil. 2025</time>)</span> : assistance technique, incidents matériels et logiciels.</li>
-            <li><strong>Stagiaire — SIMMAV, IUT de Saint-Étienne</strong> <span class="muted">(<time datetime="2023-11">nov.</time> – <time datetime="2023-12">déc. 2023</time>)</span> : surveillance réseau, déploiement de logiciels, support.</li>
-            <li><strong>Bénévole support informatique — YorkHost</strong> <span class="muted">(<time datetime="2023-03">mars</time> – <time datetime="2023-11">nov. 2023</time>, à distance)</span> : assistance aux utilisateurs de services d'hébergement web.</li>
-          </ul>
-        </div>
-        <div class="level-scene level-experiences" aria-hidden="true">
-          <span class="pit"></span>
-          <span class="bridge-emitter"></span>
-          <span class="light-bridge"></span>
-          <span class="wire"></span>
-          <span class="exit">
-            <span class="exit-sign"><svg class="icon"><use href="#i-check"/></svg></span>
-            <span class="exit-door"><span></span><span></span></span>
-          </span>
+        <div class="level-scene level-experiences">
+          <div class="scene-decor" aria-hidden="true">
+            <span class="pit"></span>
+            <span class="bridge-emitter"></span>
+            <span class="light-bridge"></span>
+            <span class="wire"></span>
+            <span class="exit">
+              <span class="exit-sign"><svg class="icon"><use href="#i-check"/></svg></span>
+              <span class="exit-door"><span></span><span></span></span>
+            </span>
+          </div>
+          <button type="button" class="puzzle-btn pb-experiences" hidden><span class="key" aria-hidden="true">E</span> Activer le pont</button>
+          <button type="button" class="exit-btn" hidden><span class="exit-label">Niveau suivant</span></button>
         </div>
       </div>
     </section>
 
-    <section id="projets" class="chamber" aria-labelledby="titre-projets" data-annonce="Chambre 03 : projets. Le sujet héberge ses propres serveurs. Par plaisir, apparemment.">
+    <section id="projets" class="chamber" aria-labelledby="titre-projets" data-annonce="Niveau 03 : projets. Le sujet héberge ses propres serveurs. Par plaisir, apparemment.">
       <div class="chamber-inner">
         <div class="chamber-head">
           <p class="chamber-num" aria-hidden="true">03</p>
@@ -307,83 +317,88 @@
             <ul class="sign-icons" aria-hidden="true"><li><svg class="icon"><use href="#i-flask"/></svg></li><li><svg class="icon"><use href="#i-server"/></svg></li><li><svg class="icon"><use href="#i-code"/></svg></li><li><svg class="icon"><use href="#i-cube"/></svg></li></ul>
           </div>
         </div>
-
-        <div class="grid-2 align-start">
-          <div class="panel">
-            <h3><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg> Infrastructure et administration</h3>
-            <ul class="card-list">
-              <li>
-                <strong>Monitoring Proxmox</strong>
-                <p>Contrôle hebdomadaire des VM et conteneurs, redémarrage automatique, alertes par webhook et e-mail.</p>
-                <p class="stack">Bash · cron</p>
-              </li>
-              <li>
-                <strong>Logs SSH et fail2ban</strong>
-                <p>Connexions et bannissements centralisés et archivés, alertes en temps réel.</p>
-                <p class="stack">Bash · webhook</p>
-              </li>
-              <li>
-                <strong>Serveur mail</strong>
-                <p>poste.io sous Docker, enregistrements DNS MX, SPF, DKIM et TLS.</p>
-                <p class="stack">Docker · DNS</p>
-              </li>
-              <li>
-                <strong>Serveur Proxmox</strong>
-                <p>Nœud dédié à l'hébergement, supervisé.</p>
-                <p class="stack">Proxmox VE</p>
-              </li>
-              <li>
-                <strong>Réseau</strong>
-                <p>Routage, VLAN, pare-feu et VPN sur Mikrotik et HP Aruba.</p>
-                <p class="stack">RouterOS · Aruba</p>
-              </li>
-              <li>
-                <strong>Nextcloud et NAS</strong>
-                <p>Nextcloud auto-hébergé stocké sur un NAS OpenMediaVault (partages SMB/NFS, RAID).</p>
-                <p class="stack">Apache · PHP · OpenMediaVault</p>
-              </li>
-            </ul>
-          </div>
-          <div class="panel">
-            <h3><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg> Développement</h3>
-            <ul class="card-list">
-              <li>
-                <strong>Budgie</strong>
-                <p>Application Android de budget personnel, 100 % locale.</p>
-                <p class="stack">Flutter · Dart · SQLite</p>
-              </li>
-              <li>
-                <strong>Portfolio v4</strong>
-                <p><a href="https://www.olivier-dutoit.fr" target="_blank" rel="noopener noreferrer">Voir mon portfolio olivier-dutoit.fr<span class="vh"> (nouvel onglet)</span></a></p>
-                <p class="stack">Node.js · Express · EJS</p>
-              </li>
-              <li>
-                <strong>API REST pour un serveur de jeu</strong>
-                <p>Gestion des données joueurs d'un serveur Garry's Mod.</p>
-                <p class="stack">Node.js · Express · MySQL</p>
-              </li>
-              <li>
-                <strong>Sites vitrines</strong>
-                <p>solve-scp (serveur SCP RP) et solve-city.fr (serveur GTA RP).</p>
-                <p class="stack">HTML · CSS</p>
-              </li>
-            </ul>
+        <div class="room">
+          <div class="grid-2 align-start">
+            <div class="panel">
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg> Infrastructure et administration</h3>
+              <ul class="card-list">
+                <li>
+                  <strong>Monitoring Proxmox</strong>
+                  <p>Contrôle hebdomadaire des VM et conteneurs, redémarrage automatique, alertes par webhook et e-mail.</p>
+                  <p class="stack">Bash · cron</p>
+                </li>
+                <li>
+                  <strong>Logs SSH et fail2ban</strong>
+                  <p>Connexions et bannissements centralisés et archivés, alertes en temps réel.</p>
+                  <p class="stack">Bash · webhook</p>
+                </li>
+                <li>
+                  <strong>Serveur mail</strong>
+                  <p>poste.io sous Docker, enregistrements DNS MX, SPF, DKIM et TLS.</p>
+                  <p class="stack">Docker · DNS</p>
+                </li>
+                <li>
+                  <strong>Serveur Proxmox</strong>
+                  <p>Nœud dédié à l'hébergement, supervisé.</p>
+                  <p class="stack">Proxmox VE</p>
+                </li>
+                <li>
+                  <strong>Réseau</strong>
+                  <p>Routage, VLAN, pare-feu et VPN sur Mikrotik et HP Aruba.</p>
+                  <p class="stack">RouterOS · Aruba</p>
+                </li>
+                <li>
+                  <strong>Nextcloud et NAS</strong>
+                  <p>Nextcloud auto-hébergé stocké sur un NAS OpenMediaVault (partages SMB/NFS, RAID).</p>
+                  <p class="stack">Apache · PHP · OpenMediaVault</p>
+                </li>
+              </ul>
+            </div>
+            <div class="panel">
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg> Développement</h3>
+              <ul class="card-list">
+                <li>
+                  <strong>Budgie</strong>
+                  <p>Application Android de budget personnel, 100 % locale.</p>
+                  <p class="stack">Flutter · Dart · SQLite</p>
+                </li>
+                <li>
+                  <strong>Portfolio v4</strong>
+                  <p><a href="https://www.olivier-dutoit.fr" target="_blank" rel="noopener noreferrer">Voir mon portfolio olivier-dutoit.fr<span class="vh"> (nouvel onglet)</span></a></p>
+                  <p class="stack">Node.js · Express · EJS</p>
+                </li>
+                <li>
+                  <strong>API REST pour un serveur de jeu</strong>
+                  <p>Gestion des données joueurs d'un serveur Garry's Mod.</p>
+                  <p class="stack">Node.js · Express · MySQL</p>
+                </li>
+                <li>
+                  <strong>Sites vitrines</strong>
+                  <p>solve-scp (serveur SCP RP) et solve-city.fr (serveur GTA RP).</p>
+                  <p class="stack">HTML · CSS</p>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-        <div class="level-scene level-projets" aria-hidden="true">
-          <span class="laser-emitter"></span>
-          <span class="laser-beam"></span>
-          <span class="laser-catcher"></span>
-          <span class="wire"></span>
-          <span class="exit">
-            <span class="exit-sign"><svg class="icon"><use href="#i-check"/></svg></span>
-            <span class="exit-door"><span></span><span></span></span>
-          </span>
+        <div class="level-scene level-projets">
+          <div class="scene-decor" aria-hidden="true">
+            <span class="laser-emitter"></span>
+            <span class="laser-beam"></span>
+            <span class="laser-catcher"></span>
+            <span class="wire"></span>
+            <span class="exit">
+              <span class="exit-sign"><svg class="icon"><use href="#i-check"/></svg></span>
+              <span class="exit-door"><span></span><span></span></span>
+            </span>
+          </div>
+          <button type="button" class="puzzle-btn pb-projets" hidden><span class="key" aria-hidden="true">E</span> Orienter le laser</button>
+          <button type="button" class="exit-btn" hidden><span class="exit-label">Niveau suivant</span></button>
         </div>
       </div>
     </section>
 
-    <section id="formation" class="chamber" aria-labelledby="titre-formation" data-annonce="Chambre 04 : formation. Deux mentions Très Bien. Nous avons vérifié deux fois.">
+    <section id="formation" class="chamber" aria-labelledby="titre-formation" data-annonce="Niveau 04 : formation. Deux mentions Très Bien. Nous avons vérifié deux fois.">
       <div class="chamber-inner">
         <div class="chamber-head">
           <p class="chamber-num" aria-hidden="true">04</p>
@@ -394,44 +409,49 @@
             <ul class="sign-icons" aria-hidden="true"><li><svg class="icon"><use href="#i-cap"/></svg></li><li><svg class="icon"><use href="#i-doc"/></svg></li><li><svg class="icon"><use href="#i-shield"/></svg></li><li><svg class="icon"><use href="#i-user"/></svg></li></ul>
           </div>
         </div>
-
-        <ol class="timeline">
-          <li class="panel">
-            <p class="card-meta"><time datetime="2026">2026</time> – <time datetime="2028">2028</time> · 1<sup>re</sup> année</p>
-            <h3>BTS SIO option SISR</h3>
-            <p>CFAI Loire Drôme Ardèche, en alternance</p>
-          </li>
-          <li class="panel">
-            <p class="card-meta"><time datetime="2023">2023</time> – <time datetime="2026">2026</time> · <span class="tag tag-orange">Mention Très Bien</span></p>
-            <h3>Bac Pro CIEL</h3>
-            <p>Lycée professionnel Marc Seguin, Annonay</p>
-          </li>
-          <li class="panel">
-            <p class="card-meta"><time datetime="2023">2023</time> · <span class="tag tag-orange">Mention Très Bien</span></p>
-            <h3>Diplôme national du brevet</h3>
-            <p>Série professionnelle</p>
-          </li>
-          <li class="panel">
-            <p class="card-meta">Certifications</p>
-            <h3>Habilitation électrique BR et certification PIX</h3>
-            <p>HABILEC BR · PIX</p>
-          </li>
-        </ol>
-        <div class="level-scene level-formation" aria-hidden="true">
-          <span class="launch-plate"></span>
-          <svg class="launch-arc" viewBox="0 0 400 120" preserveAspectRatio="none"><path d="M10 115 Q 190 -40 380 60"/></svg>
-          <span class="ledge"></span>
-          <span class="level-cube level-cube-ledge"><svg class="icon"><use href="#i-cube"/></svg></span>
-          <span class="wire"></span>
-          <span class="exit">
-            <span class="exit-sign"><svg class="icon"><use href="#i-check"/></svg></span>
-            <span class="exit-door"><span></span><span></span></span>
-          </span>
+        <div class="room">
+          <ol class="timeline">
+            <li class="panel">
+              <p class="card-meta"><time datetime="2026">2026</time> – <time datetime="2028">2028</time> · 1<sup>re</sup> année</p>
+              <h3>BTS SIO option SISR</h3>
+              <p>CFAI Loire Drôme Ardèche, en alternance</p>
+            </li>
+            <li class="panel">
+              <p class="card-meta"><time datetime="2023">2023</time> – <time datetime="2026">2026</time> · <span class="tag tag-orange">Mention Très Bien</span></p>
+              <h3>Bac Pro CIEL</h3>
+              <p>Lycée professionnel Marc Seguin, Annonay</p>
+            </li>
+            <li class="panel">
+              <p class="card-meta"><time datetime="2023">2023</time> · <span class="tag tag-orange">Mention Très Bien</span></p>
+              <h3>Diplôme national du brevet</h3>
+              <p>Série professionnelle</p>
+            </li>
+            <li class="panel">
+              <p class="card-meta">Certifications</p>
+              <h3>Habilitation électrique BR et certification PIX</h3>
+              <p>HABILEC BR · PIX</p>
+            </li>
+          </ol>
+        </div>
+        <div class="level-scene level-formation">
+          <div class="scene-decor" aria-hidden="true">
+            <span class="launch-plate"></span>
+            <svg class="launch-arc" viewBox="0 0 400 120" preserveAspectRatio="none"><path d="M10 115 Q 190 -40 380 60"/></svg>
+            <span class="ledge"></span>
+            <span class="level-cube level-cube-ledge"><svg class="icon"><use href="#i-cube"/></svg></span>
+            <span class="wire"></span>
+            <span class="exit">
+              <span class="exit-sign"><svg class="icon"><use href="#i-check"/></svg></span>
+              <span class="exit-door"><span></span><span></span></span>
+            </span>
+          </div>
+          <button type="button" class="puzzle-btn pb-formation" hidden><span class="key" aria-hidden="true">E</span> Lancer le cube</button>
+          <button type="button" class="exit-btn" hidden><span class="exit-label">Niveau suivant</span></button>
         </div>
       </div>
     </section>
 
-    <section id="profil" class="chamber" aria-labelledby="titre-profil" data-annonce="Chambre 05 : profil. Cette chambre ne contient aucun piège. Probablement.">
+    <section id="profil" class="chamber" aria-labelledby="titre-profil" data-annonce="Niveau 05 : profil. Cette chambre ne contient aucun piège. Probablement.">
       <div class="chamber-inner">
         <div class="chamber-head">
           <p class="chamber-num" aria-hidden="true">05</p>
@@ -442,47 +462,52 @@
             <ul class="sign-icons" aria-hidden="true"><li><svg class="icon"><use href="#i-user"/></svg></li><li><svg class="icon"><use href="#i-headset"/></svg></li><li><svg class="icon"><use href="#i-cube"/></svg></li><li><svg class="icon"><use href="#i-portal"/></svg></li></ul>
           </div>
         </div>
-
-        <div class="grid-3">
-          <article class="panel">
-            <h3>Langues</h3>
-            <ul class="chips">
-              <li>Français</li>
-              <li>Anglais : niveau B2</li>
-            </ul>
-          </article>
-          <article class="panel">
-            <h3>Atouts</h3>
-            <ul class="chips">
-              <li>Méticuleux</li>
-              <li>Organisé</li>
-              <li>Esprit d'équipe</li>
-              <li>Ponctuel</li>
-            </ul>
-          </article>
-          <article class="panel">
-            <h3>Centres d'intérêt</h3>
-            <ul class="chips">
-              <li>Homelab et auto-hébergement</li>
-              <li>Serveurs de jeu</li>
-              <li>Veille techno</li>
-              <li>Musique</li>
-              <li>Jeu de rôle</li>
-              <li>VTT</li>
-              <li>Jeux vidéo</li>
-            </ul>
-          </article>
+        <div class="room">
+          <div class="grid-3">
+            <article class="panel">
+              <h3>Langues</h3>
+              <ul class="chips">
+                <li>Français</li>
+                <li>Anglais : niveau B2</li>
+              </ul>
+            </article>
+            <article class="panel">
+              <h3>Atouts</h3>
+              <ul class="chips">
+                <li>Méticuleux</li>
+                <li>Organisé</li>
+                <li>Esprit d'équipe</li>
+                <li>Ponctuel</li>
+              </ul>
+            </article>
+            <article class="panel">
+              <h3>Centres d'intérêt</h3>
+              <ul class="chips">
+                <li>Homelab et auto-hébergement</li>
+                <li>Serveurs de jeu</li>
+                <li>Veille techno</li>
+                <li>Musique</li>
+                <li>Jeu de rôle</li>
+                <li>VTT</li>
+                <li>Jeux vidéo</li>
+              </ul>
+            </article>
+          </div>
         </div>
-        <div class="level-scene level-profil" aria-hidden="true">
-          <span class="gel gel-blue"></span>
-          <span class="gel gel-orange"></span>
-          <span class="gel-pipe gel-pipe-blue"></span>
-          <span class="gel-pipe gel-pipe-orange"></span>
-          <span class="wire"></span>
-          <span class="exit">
-            <span class="exit-sign"><svg class="icon"><use href="#i-check"/></svg></span>
-            <span class="exit-door"><span></span><span></span></span>
-          </span>
+        <div class="level-scene level-profil">
+          <div class="scene-decor" aria-hidden="true">
+            <span class="gel gel-blue"></span>
+            <span class="gel gel-orange"></span>
+            <span class="gel-pipe gel-pipe-blue"></span>
+            <span class="gel-pipe gel-pipe-orange"></span>
+            <span class="wire"></span>
+            <span class="exit">
+              <span class="exit-sign"><svg class="icon"><use href="#i-check"/></svg></span>
+              <span class="exit-door"><span></span><span></span></span>
+            </span>
+          </div>
+          <button type="button" class="puzzle-btn pb-profil" hidden><span class="key" aria-hidden="true">E</span> Ouvrir les tuyaux</button>
+          <button type="button" class="exit-btn" hidden><span class="exit-label">Niveau suivant</span></button>
         </div>
       </div>
     </section>
