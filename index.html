@@ -6,7 +6,9 @@
   <title>Olivier Dutoit — CV, alternant BTS SIO SISR (réseaux et systèmes)</title>
   <meta name="description" content="CV d'Olivier Dutoit, alternant BTS SIO option SISR à Saint-Étienne : Windows Server, Linux, Active Directory, réseaux, Proxmox et projets d'infrastructure auto-hébergée.">
   <link rel="canonical" href="https://cv.olivier-dutoit.fr/">
-  <meta name="theme-color" content="#e6e9ec">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#e4e7ea" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c2023" media="(prefers-color-scheme: dark)">
   <meta property="og:type" content="profile">
   <meta property="og:title" content="Olivier Dutoit — CV, alternant BTS SIO SISR">
   <meta property="og:description" content="Réseaux, systèmes, virtualisation et homelab : le CV d'Olivier Dutoit, présenté comme un parcours de chambres de test.">
@@ -14,6 +16,21 @@
   <meta property="og:locale" content="fr_FR">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='11' cy='16' rx='6' ry='12' fill='none' stroke='%2327a7ff' stroke-width='3'/%3E%3Cellipse cx='22' cy='16' rx='6' ry='12' fill='none' stroke='%23ff9d2e' stroke-width='3'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Olivier Dutoit",
+    "jobTitle": "Alternant BTS SIO option SISR",
+    "url": "https://cv.olivier-dutoit.fr/",
+    "address": { "@type": "PostalAddress", "addressLocality": "Saint-Étienne", "addressCountry": "FR" },
+    "worksFor": { "@type": "Organization", "name": "Bernard Bonnefond" },
+    "alumniOf": { "@type": "EducationalOrganization", "name": "LPP Marc Seguin, Annonay" },
+    "knowsAbout": ["Windows Server", "Linux", "Active Directory", "Réseaux", "Proxmox VE", "Docker", "PowerShell", "Bash"],
+    "knowsLanguage": ["fr", "en"],
+    "sameAs": ["https://github.com/Teksya", "https://www.linkedin.com/in/olivier-dutoit", "https://www.olivier-dutoit.fr"]
+  }
+  </script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
@@ -24,7 +41,7 @@
       <svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg>
       <span class="tool-label">Afficher le CV classique</span>
     </button>
-    <a class="tool-btn" href="cv-olivier-dutoit.pdf" download>
+    <a class="tool-btn" href="cv-olivier-dutoit.pdf" type="application/pdf" download>
       <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
       <span>Exporter en PDF</span>
     </a>

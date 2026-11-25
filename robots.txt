@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://cv.olivier-dutoit.fr/sitemap.xml
