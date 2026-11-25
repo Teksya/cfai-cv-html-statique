@@ -82,7 +82,7 @@ Vérifier ensuite que le PDF ne contient ni e-mail, ni téléphone, ni adresse.
 
 Hommage à l'esthétique des jeux de puzzle à portails (Portal 2) : le CV est un parcours de **chambres de test** numérotées 00 → 06. On arrive par l'ascenseur (accueil, chambre 00), on traverse une chambre par section du CV, puis le plafond de la dernière chambre est éventré et on sort **sur la Lune**, la Terre dans le ciel (contact, chambre 06). Le décor est poussé vers le réalisme, mais reste un décor : le CV doit rester lisible et sérieux.
 
-**Hommage, pas copie** : aucun logo, nom de marque, nom de personnage, réplique, texture ou son repris du jeu (pas de logo de l'entreprise fictive, pas de nom d'IA, pas de cube à cœur, pas de citation). Pictogrammes, textes du narrateur et formes sont originaux. Le pied de page mentionne l'hommage et l'absence d'affiliation.
+**Hommage, pas copie** : aucun logo, nom de marque, nom de personnage, réplique, texture ou son repris du jeu (pas de logo de l'entreprise fictive, pas de nom d'IA, pas de citation). Le cube est un cube lesté générique en 3D avec un emblème original (lentille lumineuse), **pas** le cube à cœur du jeu. Pictogrammes, textes du narrateur et formes sont originaux. Le pied de page mentionne l'hommage et l'absence d'affiliation.
 
 ### Palette (dans `:root` de `css/style.css`)
 
@@ -111,7 +111,9 @@ Thème sombre (`prefers-color-scheme`) : « aile désaffectée » du labo, panne
 - **Accueil** : fenêtre de salle d'observation, deux portails face à face, cube au sol.
 - **Final** : brèche dans le plafond, étoiles sur deux couches, Terre éclairée de côté, cube à la dérive, sol lunaire SVG à cratères.
 - **Narrateur** (JS, ≥ 900 px, `aria-hidden`) : une phrase originale par chambre (`data-annonce`), ton pince-sans-rire, effacée après 7 s et en bas de page.
-- **Outils fixes** (`.view-tools`, en haut à gauche) : « Afficher le CV classique » (bouton `aria-pressed`, masqué sans JS) et « Exporter en PDF » (lien `download`).
+- **Cube** (`.cube3d` > trois `.cube-face`) : vrai cube 3D en CSS (`preserve-3d`), coins renforcés, joints, lentille orange allumée ; taille par `--s`. Utilisé à l'accueil (pivote au survol), dans les niveaux 01 et 04 et à la dérive dans l'espace.
+- **En-tête** (`header.site-header`, collant dans tous les modes) : à gauche les outils « Afficher le CV classique » (bouton `aria-pressed`, masqué sans JS) et « Exporter en PDF » (icônes seules sous 1360 px, libellés gardés pour les lecteurs d'écran, `title` en infobulle), puis le badge du sujet, puis le sélecteur de niveaux : chaque lien porte un segment lumineux, bleu pour le niveau courant (`aria-current`), orange pour un niveau résolu (`.is-solved`).
+- **Pied de page** (`footer.site-footer`) : plaque de générique (identité, liens GitHub / LinkedIn / portfolio / PDF, mentions et retour à l'ascenseur). En mode jeu, il n'apparaît qu'au dernier niveau, en bandeau translucide sur la Lune.
 
 ### Typographie
 
