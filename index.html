@@ -31,6 +31,23 @@
   </div>
 
   <svg class="sprite" aria-hidden="true" focusable="false">
+    <!-- portal rim: noise-displaced ring of light, bloomed twice -->
+    <filter id="f-rim" x="-40%" y="-25%" width="180%" height="150%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05 0.018" numOctaves="3" seed="7" result="noise">
+        <animate attributeName="baseFrequency" dur="2.6s" values="0.05 0.018;0.065 0.024;0.045 0.015;0.05 0.018" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="11" xChannelSelector="R" yChannelSelector="G" result="flame"/>
+      <feGaussianBlur in="flame" stdDeviation="2.5" result="bloom1"/>
+      <feGaussianBlur in="flame" stdDeviation="9" result="bloom2"/>
+      <feMerge><feMergeNode in="bloom2"/><feMergeNode in="bloom1"/><feMergeNode in="flame"/></feMerge>
+    </filter>
+    <symbol id="portal-rim" viewBox="0 0 140 240">
+      <g filter="url(#f-rim)" fill="none">
+        <ellipse cx="70" cy="120" rx="52" ry="104" stroke="currentColor" stroke-width="13"/>
+        <ellipse cx="70" cy="120" rx="51" ry="103" style="stroke: var(--portal-core)" stroke-width="4"/>
+        <ellipse cx="70" cy="120" rx="46" ry="97" stroke="currentColor" stroke-width="3" opacity=".6"/>
+      </g>
+    </symbol>
     <symbol id="i-server" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h4M12 17.5h4"/></symbol>
     <symbol id="i-network" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v4.5M12 12l-5.5 5M12 12l5.5 5"/></symbol>
     <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></symbol>
@@ -95,21 +112,9 @@
 
         <div class="hero-scene" aria-hidden="true">
           <span class="observation"></span>
-          <div class="sign">
-            <p class="sign-num">00</p>
-            <p class="sign-total">/06</p>
-            <div class="sign-bar"><span></span></div>
-            <p class="sign-label">Ascenseur d'arrivée</p>
-            <ul class="sign-icons">
-              <li><svg class="icon"><use href="#i-server"/></svg></li>
-              <li><svg class="icon"><use href="#i-network"/></svg></li>
-              <li><svg class="icon"><use href="#i-layers"/></svg></li>
-              <li><svg class="icon"><use href="#i-shield"/></svg></li>
-              <li><svg class="icon"><use href="#i-code"/></svg></li>
-            </ul>
-          </div>
-          <span class="portal portal-blue"></span>
-          <span class="portal portal-orange"></span>
+          <span class="portal portal-blue"><span class="portal-view"></span><svg class="portal-rim" viewBox="0 0 140 240"><use href="#portal-rim"/></svg></span>
+          <span class="portal portal-orange"><span class="portal-view"></span><svg class="portal-rim" viewBox="0 0 140 240"><use href="#portal-rim"/></svg></span>
+          <span class="scene-floor"></span>
           <span class="hero-cube"><svg class="icon"><use href="#i-cube"/></svg></span>
         </div>
       </div>
@@ -440,7 +445,7 @@
           <ellipse class="crater" cx="480" cy="118" rx="26" ry="5"/>
           <ellipse class="crater" cx="120" cy="190" rx="44" ry="8"/>
         </svg>
-        <span class="portal portal-blue portal-moon"></span>
+        <span class="portal portal-blue portal-moon"><span class="portal-view"></span><svg class="portal-rim" viewBox="0 0 140 240"><use href="#portal-rim"/></svg></span>
       </div>
       <div class="chamber-inner">
         <div class="chamber-head">

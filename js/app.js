@@ -7,6 +7,15 @@
   root.classList.add('js');
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // CSS cannot stop the SVG (SMIL) flicker of the portal rims: pause it here.
+  var sprite = document.querySelector('.sprite');
+  function syncSvgMotion() {
+    if (!sprite || !sprite.pauseAnimations) return;
+    if (reduceMotion.matches) sprite.pauseAnimations(); else sprite.unpauseAnimations();
+  }
+  syncSvgMotion();
+  if (reduceMotion.addEventListener) reduceMotion.addEventListener('change', syncSvgMotion);
   var header = document.querySelector('.site-header');
   var bar = document.querySelector('.test-progress-bar');
   var narrator = document.querySelector('.narrator');
@@ -70,6 +79,8 @@
     var max = document.documentElement.scrollHeight - window.innerHeight;
     var ratio = max > 0 ? Math.min(1, window.scrollY / max) : 0;
     if (bar) bar.style.width = (ratio * 100).toFixed(1) + '%';
+    // Keep the footer readable: the narrator steps aside at the very end.
+    if (narrator && ratio > .97) narrator.classList.add('is-hidden');
   }
   window.addEventListener('scroll', function () {
     if (!ticking) { ticking = true; requestAnimationFrame(updateProgress); }
@@ -115,8 +126,10 @@
   // where you land. Plain anchor jump when motion is reduced.
   function spawnPortal(color, x, y) {
     var fx = document.createElement('span');
-    fx.className = 'portal-fx is-' + color;
+    fx.className = 'portal-fx';
     fx.setAttribute('aria-hidden', 'true');
+    fx.innerHTML = '<span class="portal portal-' + color + '"><span class="portal-view"></span>' +
+      '<svg class="portal-rim" viewBox="0 0 140 240"><use href="#portal-rim"/></svg></span>';
     fx.style.left = x + 'px';
     fx.style.top = y + 'px';
     document.body.appendChild(fx);
