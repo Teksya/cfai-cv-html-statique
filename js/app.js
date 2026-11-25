@@ -100,11 +100,13 @@
     // the camera flies into the current room...
     var leaving = chambers[current];
     if (leaving) leaving.classList.add('is-leaving');
+    if (gl3d) window.CV3D.travel(0, 440, 300);
     setTimeout(function () {
       if (leaving) leaving.classList.remove('is-leaving');
       // ...and the next room arrives from the depth
       var next = chambers[index];
       next.classList.add('is-entering');
+      if (gl3d) window.CV3D.travel(-420, 0, 520);
       activate(index, options.focus);
       warp.classList.remove('is-on');
       requestAnimationFrame(function () {
@@ -139,6 +141,11 @@
   // Camera: follows the pointer (or the phone's tilt), drifts on its own
   // when nobody moves. Walls swing, the content floats: depth for free.
   var cam = { x: 0, y: 0, tx: 0, ty: 0, last: 0 };
+
+  // Realistic rendering: hand-written WebGL2 (js/scene3d.js) draws the room,
+  // lights, shadows and portals. Without WebGL2 the CSS 3D room stays.
+  var gl3d = !!(window.CV3D && window.CV3D.init(document.querySelector('main')));
+  if (gl3d) root.classList.add('gl');
   var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
 
   window.addEventListener('pointermove', function (event) {
@@ -157,13 +164,17 @@
 
   function cameraFrame(now) {
     requestAnimationFrame(cameraFrame);
-    if (!isGame() || reduceMotion.matches || document.hidden) return;
-    if (now - cam.last > 2500) { // idle: slow sway
-      cam.tx = Math.sin(now / 2600) * .45;
-      cam.ty = Math.sin(now / 3700) * .25;
+    if (!isGame() || document.hidden) return;
+    if (reduceMotion.matches) {
+      cam.x = cam.y = 0; // still camera, but the room is still drawn
+    } else {
+      if (now - cam.last > 2500) { // idle: slow sway
+        cam.tx = Math.sin(now / 2600) * .45;
+        cam.ty = Math.sin(now / 3700) * .25;
+      }
+      cam.x += (cam.tx - cam.x) * .06;
+      cam.y += (cam.ty - cam.y) * .06;
     }
-    cam.x += (cam.tx - cam.x) * .06;
-    cam.y += (cam.ty - cam.y) * .06;
     var section = chambers[current];
     if (!section) return;
     var stage = section.querySelector('.stage');
@@ -174,6 +185,8 @@
     inner.style.transform = stage ? view : '';
     var sky = section.querySelector('.space-sky');
     if (sky) sky.style.transform = 'translate3d(' + (cam.x * -24).toFixed(1) + 'px,' + (cam.y * -14).toFixed(1) + 'px,0) scale(1.06)';
+    // the WebGL room is drawn with the very same camera angles
+    if (gl3d) window.CV3D.frame(section, cam.x * 7, -cam.y * 4.5, now);
   }
   requestAnimationFrame(cameraFrame);
 

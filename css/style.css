@@ -594,7 +594,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
 .portal.portal-moon {
   width: 170px; height: 290px;
   left: auto; right: 12%; bottom: -10px;
-  transform: perspective(500px) rotateX(74deg);
+  transform: perspective(500px) rotateX(var(--flat));
   transform-origin: 50% 100%;
 }
 .portal-moon .portal-view {
@@ -1417,29 +1417,29 @@ html.game { overflow: hidden; }
    flat, wall pieces stand across the room. */
 .game .scene-decor { transform-style: preserve-3d; }
 .game .surf-drop, .game .surf-side, .game .tile, .game .pit, .game .launch-plate {
-  height: 70px; bottom: 0; transform-origin: 50% 100%; transform: rotateX(74deg);
+  height: 70px; bottom: 0; transform-origin: 50% 100%; transform: rotateX(var(--flat));
 }
-.game .surf-top, .game .surf-roof { height: 70px; transform-origin: 50% 0; transform: rotateX(-74deg); }
-.game .surf-hit, .game .surf-edge, .game .glass { width: 70px; transform-origin: 0 50%; transform: rotateY(68deg); }
+.game .surf-top, .game .surf-roof { height: 70px; transform-origin: 50% 0; transform: rotateX(calc(var(--flat) * -1)); }
+.game .surf-hit, .game .surf-edge, .game .glass { width: 70px; transform-origin: 0 50%; transform: rotateY(var(--across)); }
 .game .pit { background: radial-gradient(ellipse at 50% 100%, #000, #0b0d0f); box-shadow: inset 0 0 14px #000; }
 .game .launch-plate { border-radius: 6px; }
 .game .launch-plate::before { top: 8px; bottom: 8px; height: auto; }
 
 /* light bridges are walkways, not lines */
 .game .light-bridge, .game .bridge-a { height: 54px; transform-origin: 0 100%; }
-.game .level-experiences .light-bridge { transform: rotateX(74deg) scaleX(0); }
+.game .level-experiences .light-bridge { transform: rotateX(var(--flat)) scaleX(0); }
 .game .level-experiences.is-bridged .light-bridge,
-.game .level-experiences.is-cleared .light-bridge { transform: rotateX(74deg); }
-.game .bridge-a { top: auto; bottom: calc(100% - 38px); transform: rotateX(74deg) scaleX(0); }
-.game .is-firing .bridge-a, .game .is-cleared .bridge-a { transform: rotateX(74deg); }
-.game .bridge-c { width: 54px; transform-origin: 0 0; transform: rotateY(68deg) scaleY(0); }
-.game .is-dropping .bridge-c { transform: rotateY(68deg); }
+.game .level-experiences.is-cleared .light-bridge { transform: rotateX(var(--flat)); }
+.game .bridge-a { top: auto; bottom: calc(100% - 38px); transform: rotateX(var(--flat)) scaleX(0); }
+.game .is-firing .bridge-a, .game .is-cleared .bridge-a { transform: rotateX(var(--flat)); }
+.game .bridge-c { width: 54px; transform-origin: 0 0; transform: rotateY(var(--across)) scaleY(0); }
+.game .is-dropping .bridge-c { transform: rotateY(var(--across)); }
 
 /* the big red button: a base and a raised cap */
 .game .floor-button {
   width: 84px; height: auto; aspect-ratio: 1; border-radius: 50%;
   background: radial-gradient(circle, #454c52 55%, #15181a 70%);
-  transform-origin: 50% 100%; transform: rotateX(72deg); transform-style: preserve-3d;
+  transform-origin: 50% 100%; transform: rotateX(var(--flat)); transform-style: preserve-3d;
 }
 .game .floor-button::before {
   left: 14%; right: 14%; top: 14%; bottom: 14%; height: auto; border-radius: 50%;
@@ -1452,14 +1452,14 @@ html.game { overflow: hidden; }
 .game .ledge::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 60px;
   background: linear-gradient(#7d868c, #59626a);
-  transform-origin: 50% 100%; transform: rotateX(74deg);
+  transform-origin: 50% 100%; transform: rotateX(var(--flat));
 }
 /* exit door: set back in the room, with a threshold */
 .game .exit, .game .exit-btn { transform: translateZ(-40px); }
 .game .exit::after {
   content: ""; position: absolute; left: -10%; right: -10%; bottom: 0; height: 60px;
   background: linear-gradient(#59626a, #2b3034);
-  transform-origin: 50% 100%; transform: rotateX(74deg);
+  transform-origin: 50% 100%; transform: rotateX(var(--flat));
 }
 
 @media (min-width: 900px) {
@@ -1474,6 +1474,41 @@ html.game { overflow: hidden; }
   .game .chamber:not(.is-unlocked) .puzzle-btn .key { width: 26px; height: 26px; }
   .game .chamber:not(.is-unlocked) .puzzle-skip { font-size: .75rem; min-height: 30px; left: auto; right: 0; bottom: calc(100% + 54px); }
 }
+
+/* ---------- WebGL mode (html.gl, set by app.js when WebGL2 works) ----------
+   js/scene3d.js draws the room and every piece for real (light, shadow,
+   portals). The DOM keeps the same 3D positions but turns invisible: it is
+   the hit area, the focus ring and the accessible name of each object. */
+.game { --flat: 74deg; --across: 68deg; }
+.game.gl { --flat: 90deg; --across: 90deg; } /* truly flat / truly across: the renderer shows them */
+.gl-canvas { display: none; }
+.game.gl .gl-canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+.game.gl .chamber:not(.space) { background: transparent; }
+.game.gl .chamber.is-leaving, .game.gl .chamber.is-entering { transform: none; } /* the WebGL camera travels instead */
+.game.gl .chamber:not(.space) .wall { background: none; }
+.game.gl .wall::after, .game.gl .move-tile, .game.gl .ledge::after, .game.gl .exit::after,
+.game.gl .chamber:not(.space) .portal::before, .game.gl .stage-cube::after, .game.gl .level-cube::after { display: none; }
+.game.gl .chamber:not(.space) .portal > *, .game.gl .observation, .game.gl .cube-face, .game.gl .scene-decor { visibility: hidden; }
+.game.gl .wire, .game.gl .exit-sign, .game.gl .launch-arc, .game.gl .power-gauge { visibility: visible; }
+.game.gl .surf, .game.gl .tile { background: transparent; border-color: transparent; box-shadow: none; }
+.game.gl .level-cube .cube3d { transform: rotateY(-28deg); }
+
+/* arrival room props are real objects at every screen size */
+.game.gl .hero-scene { display: none; }
+.game.gl .hero .hero-grid { grid-template-columns: minmax(0, 540px); justify-content: start; }
+.game.gl .wall .portal, .game.gl .wall .observation, .game.gl .stage-cube { display: block; }
+.game.gl .wall-back .observation { top: 7%; left: 50%; width: 44%; height: 13%; transform: translateX(-50%); }
+.game.gl .wall-back .portal-orange { left: 58%; top: 28%; width: 30%; max-width: 250px; height: 54%; transform: none; }
+.game.gl .wall-right .portal-blue {
+  left: 38%; top: 16%; width: 330px; height: 56%; transform: none; cursor: pointer; pointer-events: auto;
+}
+.game.gl .stage-cube {
+  position: absolute; left: 56%; bottom: 0; width: 120px; height: 120px;
+  transform: translateZ(-430px); transform-style: preserve-3d;
+  pointer-events: auto; cursor: grab; touch-action: none; transition: transform .25s ease-out;
+}
+.game.gl .stage-cube .cube3d { --s: 120px; transform: rotateY(-32deg); transition: none; }
+.game.gl .stage-cube.is-grabbed { cursor: grabbing; transform: translateZ(-430px) translateY(-80px); }
 
 @keyframes plate-idle {
   0%, 68%, 100% { transform: var(--pose); }
