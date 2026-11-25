@@ -901,7 +901,8 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
   .game .chamber .panel {
     transition: transform .7s cubic-bezier(.3, 1.35, .5, 1), opacity .25s ease-out;
   }
-  .game .chamber:not(.is-in) .panel {
+  .game .chamber:not(.is-in) .panel,
+  .game .chamber:not(.is-unlocked) .panel {
     opacity: 0; transform: translateZ(-620px);
   }
   .game .chamber .panel:nth-child(2) { transition-delay: .08s; }
@@ -1234,13 +1235,13 @@ html.game { overflow: hidden; }
   .game .timeline > .panel:nth-child(even) { --pose: rotateY(-13deg) translateZ(18px); }
   .game .grid-3 > .panel:nth-child(3n+2) { --pose: translateZ(-34px); }
   .game .room .panel-flat { --pose: rotateX(7deg) translateZ(-10px); }
-  .game .chamber.is-in .room .panel {
+  .game .chamber.is-in.is-unlocked .room .panel {
     transform: var(--pose);
     animation: plate-idle 9s ease-in-out 2.5s infinite;
   }
-  .game .chamber.is-in .room .panel:nth-child(2n) { animation-duration: 12s; animation-delay: 4s; }
-  .game .chamber.is-in .room .panel:nth-child(3n) { animation-duration: 15s; animation-delay: 6s; }
-  .game .chamber.is-in .room .panel.is-tilting { animation: none; }
+  .game .chamber.is-in.is-unlocked .room .panel:nth-child(2n) { animation-duration: 12s; animation-delay: 4s; }
+  .game .chamber.is-in.is-unlocked .room .panel:nth-child(3n) { animation-duration: 15s; animation-delay: 6s; }
+  .game .chamber.is-in.is-unlocked .room .panel.is-tilting { animation: none; }
 
   /* arrival room: the flat scene gives way to real props */
   .game .hero-scene { display: none; }
@@ -1385,6 +1386,93 @@ html.game { overflow: hidden; }
   .game .level-scene { margin-top: 84px; }
   .game .puzzle-hint { right: 250px; bottom: calc(100% + 10px); font-size: 1.125rem; }
   .game .puzzle-btn { bottom: calc(100% + 10px); }
+}
+
+/* ---------- Locked levels (game mode) ----------
+   Like in the game, information is the reward. Until the puzzle is
+   solved the CV plates stay inside the wall and the puzzle fills the
+   room, scaled up (--k). Solved (or skipped): the puzzle shrinks back to
+   the floor strip and the plates come out. */
+.game .chamber:not(.is-unlocked) .room {
+  flex: 0 0 0; min-height: 0; padding: 0; margin: 0; overflow: hidden; visibility: hidden;
+}
+.game .chamber:not(.is-unlocked) .level-scene {
+  --k: 1;
+  width: calc(100% / var(--k)); align-self: center; margin-top: auto;
+  height: calc((100dvh - 440px) / var(--k)); min-height: 150px;
+  transform: translateZ(-60px) scale(var(--k)); transform-origin: 50% 100%;
+}
+.puzzle-skip { display: none; }
+.game .puzzle-skip {
+  display: block; position: absolute; z-index: 3; left: 0; bottom: calc(100% + 8px);
+  min-height: 44px; padding: 6px 12px; border-radius: var(--radius); cursor: pointer; pointer-events: auto;
+  font: 600 1rem/1.2 var(--font); color: #f2f4f5; text-decoration: underline;
+  background: rgba(20, 24, 28, .75); border: 1px solid rgba(255, 255, 255, .25);
+}
+.game .puzzle-skip:hover { background: rgba(20, 24, 28, .95); }
+.game .is-cleared .puzzle-skip { display: none; }
+
+/* ---- puzzle pieces with real depth ----
+   Floor pieces lie flat (hinged on their front edge), ceiling pieces hang
+   flat, wall pieces stand across the room. */
+.game .scene-decor { transform-style: preserve-3d; }
+.game .surf-drop, .game .surf-side, .game .tile, .game .pit, .game .launch-plate {
+  height: 70px; bottom: 0; transform-origin: 50% 100%; transform: rotateX(74deg);
+}
+.game .surf-top, .game .surf-roof { height: 70px; transform-origin: 50% 0; transform: rotateX(-74deg); }
+.game .surf-hit, .game .surf-edge, .game .glass { width: 70px; transform-origin: 0 50%; transform: rotateY(68deg); }
+.game .pit { background: radial-gradient(ellipse at 50% 100%, #000, #0b0d0f); box-shadow: inset 0 0 14px #000; }
+.game .launch-plate { border-radius: 6px; }
+.game .launch-plate::before { top: 8px; bottom: 8px; height: auto; }
+
+/* light bridges are walkways, not lines */
+.game .light-bridge, .game .bridge-a { height: 54px; transform-origin: 0 100%; }
+.game .level-experiences .light-bridge { transform: rotateX(74deg) scaleX(0); }
+.game .level-experiences.is-bridged .light-bridge,
+.game .level-experiences.is-cleared .light-bridge { transform: rotateX(74deg); }
+.game .bridge-a { top: auto; bottom: calc(100% - 38px); transform: rotateX(74deg) scaleX(0); }
+.game .is-firing .bridge-a, .game .is-cleared .bridge-a { transform: rotateX(74deg); }
+.game .bridge-c { width: 54px; transform-origin: 0 0; transform: rotateY(68deg) scaleY(0); }
+.game .is-dropping .bridge-c { transform: rotateY(68deg); }
+
+/* the big red button: a base and a raised cap */
+.game .floor-button {
+  width: 84px; height: auto; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, #454c52 55%, #15181a 70%);
+  transform-origin: 50% 100%; transform: rotateX(72deg); transform-style: preserve-3d;
+}
+.game .floor-button::before {
+  left: 14%; right: 14%; top: 14%; bottom: 14%; height: auto; border-radius: 50%;
+  transform: translateZ(4px); transition: transform .2s, background .3s, box-shadow .3s;
+}
+.game .level-scene:not(.is-cleared) .floor-button::before { transform: translateZ(14px); }
+.game .gel-target { width: 12%; min-width: 44px; }
+
+/* ledge: a block with a top */
+.game .ledge::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 60px;
+  background: linear-gradient(#7d868c, #59626a);
+  transform-origin: 50% 100%; transform: rotateX(74deg);
+}
+/* exit door: set back in the room, with a threshold */
+.game .exit, .game .exit-btn { transform: translateZ(-40px); }
+.game .exit::after {
+  content: ""; position: absolute; left: -10%; right: -10%; bottom: 0; height: 60px;
+  background: linear-gradient(#59626a, #2b3034);
+  transform-origin: 50% 100%; transform: rotateX(74deg);
+}
+
+@media (min-width: 900px) {
+  .game .chamber:not(.is-unlocked) .level-scene {
+    --k: 1.5;
+    height: calc((100dvh - 330px) / var(--k));
+    transform: translateZ(-130px) scale(var(--k));
+  }
+  /* text inside the scaled stage keeps its real size */
+  .game .chamber:not(.is-unlocked) .puzzle-hint { font-size: calc(1.125rem / 1.5 * 1.1); right: 190px; }
+  .game .chamber:not(.is-unlocked) .puzzle-btn { font-size: calc(1.3125rem / 1.5 * 1.1); min-height: 36px; }
+  .game .chamber:not(.is-unlocked) .puzzle-btn .key { width: 26px; height: 26px; }
+  .game .chamber:not(.is-unlocked) .puzzle-skip { font-size: .75rem; min-height: 30px; left: auto; right: 0; bottom: calc(100% + 54px); }
 }
 
 @keyframes plate-idle {

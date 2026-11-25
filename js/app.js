@@ -325,11 +325,20 @@
       if (link.getAttribute('href') === '#' + section.id) link.classList.add('is-solved');
     });
     var num = section.querySelector('.chamber-num');
-    var text = 'Niveau ' + (num ? num.textContent : '') + ' terminé. La porte de sortie est ouverte.';
+    var text = 'Niveau ' + (num ? num.textContent : '') + ' terminé : les panneaux d’information sortent du mur, la porte est ouverte.';
     scene.querySelector('.puzzle-hint').textContent = text;
     say(text);
-    exit.focus({ preventScroll: true });
+    // the reward: a beat to enjoy the solution, then the CV plates come out
+    setTimeout(function () {
+      section.classList.add('is-unlocked');
+      exit.focus({ preventScroll: true });
+    }, reduceMotion.matches ? 0 : 900);
   }
+
+  // Levels without a puzzle (arrival, finale) have nothing to unlock.
+  chambers.forEach(function (section) {
+    if (!section.querySelector('.level-scene')) section.classList.add('is-unlocked');
+  });
 
   function add(scene, html) {
     scene.querySelector('.scene-decor').insertAdjacentHTML('beforeend', html);
@@ -566,6 +575,23 @@
     hint.textContent = puzzle.hint;
     scene.insertBefore(hint, scene.firstChild);
     if (puzzle.init) puzzle.init(scene);
+
+    // a CV must stay readable by someone in a hurry: discreet way out
+    var skip = document.createElement('button');
+    skip.type = 'button';
+    skip.className = 'puzzle-skip';
+    skip.textContent = 'Passer l’énigme';
+    skip.addEventListener('click', function () {
+      if (scene.classList.contains('is-busy')) return;
+      scene.classList.add('is-cleared', 'is-skipped');
+      section.classList.add('is-unlocked');
+      exit.setAttribute('aria-label', 'Porte ouverte : passer au niveau suivant');
+      hint.textContent = 'Énigme passée : les informations sont affichées.';
+      var heading = section.querySelector('h2');
+      heading.setAttribute('tabindex', '-1');
+      heading.focus({ preventScroll: true });
+    });
+    scene.appendChild(skip);
 
     trigger.hidden = false;
     exit.hidden = false;
