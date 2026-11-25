@@ -445,7 +445,6 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
   content: ""; position: absolute; left: 50%; top: 50%; width: 40%; height: 40%; margin: -20% 0 0 -20%;
   border-radius: 50%; background: radial-gradient(circle, rgba(255, 170, 70, .55), transparent 70%);
 }
-.hero-cube:hover .cube3d { transform: rotateX(-24deg) rotateY(-130deg); }
 
 /* ---------- Portals ----------
    Built like the real thing: a view of the other side, a flaming rim
@@ -679,7 +678,8 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; box-shadow: no
 @media (min-width: 900px) {
   .js .narrator {
     display: flex; align-items: center; gap: 12px;
-    position: fixed; left: 16px; bottom: 16px; z-index: 30;
+    /* top right, under the header: the bottom of the screen is the puzzle floor */
+    position: fixed; right: 16px; top: 150px; z-index: 30;
     max-width: 420px; padding: 10px 14px;
     background: rgba(20, 24, 28, .92); color: #f2f4f5;
     border-radius: var(--radius); font-size: .9375rem; line-height: 1.4;
@@ -1052,6 +1052,113 @@ html.game { overflow: hidden; }
   .game .level-scene { height: 150px; }
   .game .exit-btn { height: 132px; }
 }
+
+/* ---------- 3D rooms (game mode) ----------
+   Each level is a real box in CSS 3D: back wall, side walls, floor and
+   ceiling built by app.js (.stage, decorative). The camera (stage
+   rotation) follows the pointer or the gyroscope; the CV content floats
+   in front of the room and stays plain, readable HTML. */
+.stage { display: none; }
+.game main { perspective: 1400px; }
+.game .chamber {
+  --depth: 900px;
+  perspective: 1000px; perspective-origin: 50% 42%;
+  background: #0d1013;
+  transition: transform .3s cubic-bezier(.5, 0, .75, 0), opacity .3s ease-in;
+}
+.game .space { background: var(--space); }
+/* level change: fly forward into the room, the next one comes from the depth */
+.game .chamber.is-leaving { transform: translateZ(460px); opacity: 0; }
+.game .chamber.is-entering { transform: translateZ(-380px); opacity: 0; transition: none; }
+.game .chamber.is-active:not(.is-leaving) { transition-timing-function: cubic-bezier(.2, .8, .3, 1); transition-duration: .45s; }
+
+.game .stage {
+  display: block; position: absolute; inset: 0; pointer-events: none;
+  transform-style: preserve-3d; transform-origin: 50% 50% calc(var(--depth) / -2);
+}
+.game .chamber-inner { position: relative; z-index: 1; }
+.game .chamber::before, .game .chamber::after { z-index: 2; }
+
+.wall {
+  --tex:
+    linear-gradient(var(--wall-seam) 3px, transparent 3px) 0 0 / 120px 120px,
+    linear-gradient(90deg, var(--wall-seam) 3px, transparent 3px) 0 0 / 120px 120px,
+    linear-gradient(var(--wall-bevel) 1px, transparent 1px) 0 3px / 120px 120px,
+    linear-gradient(90deg, var(--wall-bevel) 1px, transparent 1px) 3px 0 / 120px 120px,
+    linear-gradient(155deg, transparent 35%, var(--wall-shade)) 0 0 / 120px 120px;
+  position: absolute; backface-visibility: hidden;
+}
+.wall-back {
+  inset: 0; transform: translateZ(calc(var(--depth) * -1));
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 35%, rgba(255, 255, 255, .45), transparent 70%),
+    var(--tex), var(--wall);
+}
+/* the level number, painted big on the back wall */
+.wall-back::after {
+  content: attr(data-num); position: absolute; right: 6%; bottom: 8%;
+  font: 200 clamp(10rem, 30vw, 22rem)/1 var(--font); letter-spacing: -.06em;
+  color: rgba(29, 34, 38, .14);
+}
+.wall-left, .wall-right { top: 0; height: 100%; width: var(--depth); }
+.wall-left {
+  left: 0; transform-origin: left center; transform: rotateY(90deg);
+  background:
+    linear-gradient(transparent 76%, #23282c 76%),
+    linear-gradient(90deg, rgba(0, 0, 0, .35), rgba(0, 0, 0, .04)),
+    var(--tex), var(--wall);
+}
+.wall-right {
+  right: 0; transform-origin: right center; transform: rotateY(-90deg);
+  background:
+    linear-gradient(transparent 76%, #23282c 76%),
+    linear-gradient(270deg, rgba(0, 0, 0, .4), rgba(0, 0, 0, .06)),
+    var(--tex), var(--wall);
+}
+.wall-floor, .wall-ceil { left: 0; width: 100%; height: var(--depth); }
+.wall-floor {
+  bottom: 0; transform-origin: center bottom; transform: rotateX(90deg);
+  background:
+    linear-gradient(rgba(0, 0, 0, .55), rgba(0, 0, 0, .1)),
+    linear-gradient(rgba(255, 255, 255, .06) 2px, transparent 2px) 0 0 / 160px 160px,
+    linear-gradient(90deg, rgba(255, 255, 255, .06) 2px, transparent 2px) 0 0 / 160px 160px,
+    repeating-linear-gradient(90deg, #2b3034 0 5px, #1b1f22 5px 9px);
+}
+.wall-ceil {
+  top: 0; transform-origin: center top; transform: rotateX(-90deg);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 18%, rgba(255, 255, 255, .95) 18% 20%, transparent 20% 38%),
+    linear-gradient(rgba(255, 255, 255, .2), rgba(0, 0, 0, .25)),
+    var(--tex), var(--wall);
+}
+/* glow of the ceiling light strips */
+.wall-ceil::after {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 15%, rgba(210, 235, 255, .35) 17% 21%, transparent 23% 38%);
+  filter: blur(8px);
+}
+
+/* plates tilt toward the pointer, with a glare */
+.game .panel.is-tilting {
+  transition: transform .12s ease-out;
+  background-image: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, .28), transparent 55%);
+  box-shadow: var(--shadow), 0 24px 40px -18px rgba(0, 0, 0, .55);
+}
+.game .room { perspective: 900px; }
+/* the arrival text sits on its own plate: it must stay readable over any wall */
+.game .hero-text {
+  padding: 22px 22px 24px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow), 0 30px 60px -30px rgba(0, 0, 0, .6);
+}
+
+/* hero: the cube can be grabbed and spun, the blue portal is a door */
+.game .hero-cube { cursor: grab; pointer-events: auto; touch-action: none; }
+.game .hero-cube.is-grabbed { cursor: grabbing; }
+.game .hero-cube .cube3d { transition: none; }
+.game .hero-scene .portal-blue { cursor: pointer; pointer-events: auto; }
+.game .hero-scene .portal-blue:hover { filter: brightness(1.2); }
+
+.classic .stage { display: none !important; }
 
 /* ---------- Classic view (toggle, PDF export, printing) ----------
    A plain one-column CV: same HTML, all the facility decor removed. */
