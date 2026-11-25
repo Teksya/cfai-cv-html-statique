@@ -97,18 +97,62 @@
       if (link.getAttribute('href') === '#' + section.id) link.setAttribute('aria-current', 'true');
       else link.removeAttribute('aria-current');
     });
+    say(null);
+  }
+
+  // Narrator: a line for the current chamber, or a one-off line.
+  function say(text) {
     if (!narrator || root.classList.contains('classic')) return;
     narrator.classList.add('is-hidden');
     clearTimeout(narratorTimer);
     // Read the line when the timer fires: fast jumps must show the last chamber.
     narratorTimer = setTimeout(function () {
-      var line = current.getAttribute('data-annonce');
+      var line = text || (current && current.getAttribute('data-annonce'));
       if (!line) return;
       narratorText.textContent = line;
       narrator.classList.remove('is-hidden');
       // Fade out so the line never sits on top of the content for long.
       narratorTimer = setTimeout(function () { narrator.classList.add('is-hidden'); }, 7000);
     }, reduceMotion.matches ? 0 : 200);
+  }
+
+  // Levels: panels fold out when a chamber comes into view, and the
+  // puzzle is solved (door opens) when the reader reaches its end.
+  var scenes = Array.prototype.slice.call(document.querySelectorAll('.level-scene'));
+  if ('IntersectionObserver' in window) {
+    var entering = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-in');
+        entering.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -12% 0px' });
+    chambers.forEach(function (section) { entering.observe(section); });
+
+    var solving = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var scene = entry.target;
+        solving.unobserve(scene);
+        setTimeout(function () { scene.classList.add('is-cleared'); }, reduceMotion.matches ? 0 : 250);
+        var num = scene.closest('.chamber').querySelector('.chamber-num');
+        if (num) say('Niveau ' + num.textContent + ' terminé. La porte de sortie est ouverte.');
+      });
+    }, { threshold: .8 });
+    scenes.forEach(function (scene) { solving.observe(scene); });
+
+    // The animated portal rims cost CPU: run them only while a portal is on screen.
+    var portalsOnScreen = 0;
+    var watching = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { portalsOnScreen += entry.isIntersecting ? 1 : -1; });
+      portalsOnScreen = Math.max(0, portalsOnScreen);
+      if (!sprite || !sprite.pauseAnimations || reduceMotion.matches) return;
+      if (portalsOnScreen) sprite.unpauseAnimations(); else sprite.pauseAnimations();
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.hero-scene, .space-sky'), function (el) { watching.observe(el); });
+  } else {
+    chambers.forEach(function (section) { section.classList.add('is-in'); });
+    scenes.forEach(function (scene) { scene.classList.add('is-cleared'); });
   }
 
   if ('IntersectionObserver' in window) {

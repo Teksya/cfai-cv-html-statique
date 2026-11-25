@@ -633,6 +633,215 @@ sup { line-height: 0; }
 @keyframes portal-open { from { transform: scale(0, .2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes portal-close { from { transform: scale(1); opacity: 1; } to { transform: scale(0, .2); opacity: 0; } }
 
+/* ---------- Level scenes ----------
+   Each chamber ends with its own puzzle and an exit door. The markup
+   shows the solved state; with JS, the level starts unsolved and is
+   cleared when the reader reaches it (see app.js). */
+/* clip, not hidden: keeps the sticky header and vertical overflow working */
+.chamber { --pad-b: 60px; padding-bottom: var(--pad-b); overflow-x: clip; }
+.space { --pad-b: 230px; }
+@media (min-width: 900px) {
+  .chamber { --pad-b: 80px; }
+  .space { --pad-b: 270px; }
+  .level-scene { height: 170px; }
+}
+.level-scene {
+  --metal: linear-gradient(#4a5258, #2b3034);
+  --exit-w: 78px;
+  position: relative; height: 150px; margin: 72px 0 calc(16px - var(--pad-b));
+  pointer-events: none;
+}
+.level-scene > * { position: absolute; }
+.level-scene .icon { width: 28px; height: 28px; }
+
+/* exit door with its status sign */
+.exit { right: 2%; bottom: 0; width: var(--exit-w); height: 132px; }
+.exit-sign {
+  position: absolute; top: 0; left: 50%; width: 38px; height: 22px; margin-left: -19px;
+  display: grid; place-items: center; border-radius: 3px;
+  background: var(--metal-2); color: var(--portal-orange);
+  box-shadow: 0 0 10px rgba(255, 157, 46, .6);
+  transition: color .3s, box-shadow .3s;
+}
+.exit-sign .icon { width: 16px; height: 16px; stroke-width: 3; }
+.exit-door {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 102px; overflow: hidden;
+  border: 5px solid var(--metal-1); border-bottom: 0; border-radius: 10px 10px 0 0;
+  background: radial-gradient(ellipse at 50% 100%, #fff6e0, #9aa3aa 45%, #2b3034 100%);
+}
+.exit-door span {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  background: linear-gradient(90deg, #f4f6f7, #c4cbd0);
+  transition: transform .6s cubic-bezier(.6, 0, .2, 1) .2s;
+}
+.exit-door span:first-child { left: 0; border-right: 1px solid #7a848b; transform: translateX(-100%); }
+.exit-door span:last-child { right: 0; border-left: 1px solid #7a848b; transform: translateX(100%); }
+
+/* indicator wire from the puzzle to the door */
+.wire {
+  --from: 30%;
+  left: var(--from); right: calc(2% + var(--exit-w)); bottom: 4px; height: 6px;
+  background: radial-gradient(circle, currentColor 1.6px, transparent 2.2px) 0 50% / 11px 6px repeat-x;
+  color: var(--portal-orange);
+  transition: color .3s .1s;
+}
+
+/* level 01: cube dropper and floor button */
+.dropper {
+  left: 26%; top: -30px; width: 54px; height: 62px; margin-left: -4px;
+  border: 4px solid var(--metal-1); border-top: 0; border-radius: 0 0 10px 10px;
+  background: linear-gradient(90deg, rgba(190, 225, 255, .35), rgba(255, 255, 255, .6) 40%, rgba(190, 225, 255, .25));
+}
+.level-cube {
+  left: 26%; bottom: 16px; width: 46px; height: 46px; display: grid; place-items: center;
+  background: linear-gradient(135deg, #f4f6f7, #aab3ba); color: #3a4248;
+  border: 2px solid #6b747b; border-radius: 7px;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .5), 0 8px 10px -6px rgba(0, 0, 0, .5);
+  transition: transform .55s cubic-bezier(.55, 0, .9, .4), opacity .3s;
+}
+.floor-button {
+  left: calc(26% - 17px); bottom: 0; width: 80px; height: 14px;
+  background: var(--metal); border-radius: 4px 4px 0 0;
+}
+.floor-button::before {
+  content: ""; position: absolute; left: 6px; right: 6px; top: -2px; height: 10px; border-radius: 50%;
+  background: #ff5a45; box-shadow: 0 0 12px #ff5a45;
+  transition: background .3s, box-shadow .3s;
+}
+.level-competences .wire { --from: calc(26% + 63px); }
+
+/* level 02: light bridge over a pit */
+.pit {
+  left: 32%; width: 36%; bottom: -16px; height: 20px;
+  background: linear-gradient(#000, #0b0d0f); box-shadow: inset 0 6px 8px rgba(0, 0, 0, .9);
+}
+.bridge-emitter {
+  left: calc(32% - 30px); bottom: 0; width: 30px; height: 36px;
+  background: var(--metal); border-radius: 4px 4px 0 0;
+}
+.bridge-emitter::after {
+  content: ""; position: absolute; right: -3px; top: 20px; width: 6px; height: 12px; border-radius: 3px;
+  background: var(--portal-blue); box-shadow: 0 0 10px var(--portal-blue);
+}
+.light-bridge {
+  left: 32%; width: 36%; bottom: 14px; height: 10px; transform-origin: left center;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .5) 0 2px, transparent 2px 16px),
+    linear-gradient(rgba(170, 225, 255, .95), rgba(39, 167, 255, .55));
+  box-shadow: 0 0 16px 2px rgba(39, 167, 255, .7);
+  transition: transform .6s ease-out;
+}
+.level-experiences .wire { --from: 68%; }
+
+/* level 03: laser to a receiver */
+.laser-emitter, .laser-catcher {
+  bottom: 30px; width: 36px; height: 36px; border-radius: 4px;
+  background: var(--metal);
+}
+.laser-emitter { left: 4%; }
+.laser-catcher { left: 70%; }
+.laser-emitter::after, .laser-catcher::after {
+  content: ""; position: absolute; top: 11px; width: 14px; height: 14px; border-radius: 50%;
+  background: #ff3b30; box-shadow: 0 0 12px 2px #ff3b30;
+  transition: background .3s, box-shadow .3s;
+}
+.laser-emitter::after { right: -4px; }
+.laser-catcher::after { left: -4px; }
+.laser-beam {
+  left: calc(4% + 36px); width: calc(66% - 36px); bottom: 46px; height: 4px; transform-origin: left center;
+  background: linear-gradient(#ffb3ad, #ff3b30); border-radius: 2px;
+  box-shadow: 0 0 8px 2px rgba(255, 59, 48, .8);
+  transition: transform .45s ease-out;
+}
+.laser-catcher::before { /* support pole */
+  content: ""; position: absolute; left: 14px; top: 36px; width: 8px; height: 30px; background: var(--metal-1);
+}
+.level-projets .wire { --from: calc(70% + 36px); }
+
+/* level 04: launch plate, trajectory and ledge */
+.launch-plate {
+  left: 8%; bottom: 0; width: 90px; height: 12px; border-radius: 4px 4px 0 0;
+  background: var(--metal);
+}
+.launch-plate::before {
+  content: ""; position: absolute; left: 8px; right: 8px; top: -3px; height: 6px; border-radius: 3px;
+  background: repeating-linear-gradient(90deg, #fff 0 6px, var(--portal-blue) 6px 12px);
+  box-shadow: 0 0 10px var(--portal-blue);
+}
+.level-formation { --arc-w: 34%; }
+.launch-arc { left: calc(8% + 45px); bottom: 10px; width: var(--arc-w); height: 110px; overflow: visible; }
+.launch-arc path {
+  fill: none; stroke: var(--portal-blue); stroke-width: 3; stroke-linecap: round;
+  stroke-dasharray: 2 10; vector-effect: non-scaling-stroke;
+  transition: opacity .5s;
+}
+.ledge {
+  left: calc(8% + 25px + var(--arc-w) * .95); bottom: 0; width: 70px; height: 60px;
+  background:
+    linear-gradient(rgba(255, 255, 255, .18) 2px, transparent 2px),
+    var(--metal);
+  border-radius: 3px 3px 0 0;
+}
+.level-cube-ledge { left: calc(8% + 37px + var(--arc-w) * .95); bottom: 60px; }
+.level-formation .wire { --from: calc(8% + 95px + var(--arc-w) * .95); }
+@media (min-width: 640px) { .level-formation { --arc-w: 50%; } }
+
+/* level 05: gel pipes and puddles */
+.gel-pipe {
+  top: -30px; width: 22px; height: 58px; margin-left: -11px;
+  background: linear-gradient(90deg, #2b3034, #59626a 45%, #2b3034); border-radius: 0 0 6px 6px;
+}
+.gel-pipe::after {
+  content: ""; position: absolute; left: 5px; bottom: -10px; width: 12px; height: 14px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+}
+.gel-pipe-blue { left: 21%; }
+.gel-pipe-orange { left: 55%; }
+.gel-pipe-blue::after { background: #2f8fff; }
+.gel-pipe-orange::after { background: #ff8a00; }
+.gel {
+  bottom: 0; height: 9px; border-radius: 6px 6px 0 0; transform-origin: center bottom;
+  transition: transform .6s ease-out;
+}
+.gel-blue {
+  left: 8%; width: 26%;
+  background: radial-gradient(ellipse at 30% 0, #9fd0ff, #2f8fff 60%, #1660c9);
+  box-shadow: 0 0 10px rgba(47, 143, 255, .6);
+}
+.gel-orange {
+  left: 40%; width: 30%;
+  background: radial-gradient(ellipse at 70% 0, #ffd08a, #ff8a00 60%, #c75a00);
+  box-shadow: 0 0 10px rgba(255, 138, 0, .6);
+}
+.level-profil .wire { --from: 70%; }
+
+/* unsolved state, only when JS can solve it */
+.js .level-scene:not(.is-cleared) .exit-door span { transform: none; }
+.js .level-scene:not(.is-cleared) .exit-sign { color: #5b636a; box-shadow: none; }
+.js .level-scene:not(.is-cleared) .wire { color: #8b98a3; }
+.js .level-competences:not(.is-cleared) .level-cube { transform: translateY(-92px); }
+.js .level-competences:not(.is-cleared) .floor-button::before { background: #8a2a20; box-shadow: none; }
+.js .level-experiences:not(.is-cleared) .light-bridge { transform: scaleX(0); }
+.js .level-projets:not(.is-cleared) .laser-beam { transform: scaleX(.3); }
+.js .level-projets:not(.is-cleared) .laser-catcher::after { background: #5b2a27; box-shadow: none; }
+.js .level-formation:not(.is-cleared) .launch-arc path { opacity: 0; }
+.js .level-formation:not(.is-cleared) .level-cube-ledge { opacity: 0; transform: translateY(-40px); }
+.js .level-profil:not(.is-cleared) .gel { transform: scaleX(0); }
+
+/* chamber panels fold out of the walls when a level starts */
+@media (prefers-reduced-motion: no-preference) {
+  .js:not(.classic) .chamber .panel {
+    transition: transform .5s cubic-bezier(.2, .8, .2, 1), opacity .35s ease-out;
+  }
+  .js:not(.classic) .chamber:not(.is-in) .panel {
+    opacity: 0; transform: perspective(1200px) rotateX(-32deg) translateY(28px); transform-origin: 50% 100%;
+  }
+  .js .chamber .panel:nth-child(2) { transition-delay: .06s; }
+  .js .chamber .panel:nth-child(3) { transition-delay: .12s; }
+  .js .chamber .panel:nth-child(4) { transition-delay: .18s; }
+  .js .chamber .panel:nth-child(5) { transition-delay: .24s; }
+  .js .chamber .panel:nth-child(6) { transition-delay: .3s; }
+}
+
 /* ---------- Classic view (toggle, PDF export, printing) ----------
    A plain one-column CV: same HTML, all the facility decor removed. */
 html.classic {
@@ -651,7 +860,7 @@ html.classic {
 .classic body::before,
 .classic .hero-scene, .classic .space-sky, .classic .breach, .classic .narrator,
 .classic .chamber-num, .classic .sign-bar, .classic .sign-icons, .classic .kicker,
-.classic .test-progress, .classic .site-nav, .classic .brand-mark, .classic .brand-sub,
+.classic .test-progress, .classic .site-nav, .classic .level-scene, .classic .brand-mark, .classic .brand-sub,
 .classic .chamber::before, .classic .chamber::after,
 .classic .panel::before, .classic .panel::after,
 .classic .timeline li::before { display: none !important; }
@@ -700,7 +909,7 @@ html.classic {
 }
 
 @media (forced-colors: active) {
-  .portal, .portal-fx { display: none; }
+  .portal, .portal-fx, .level-scene { display: none; }
   .brand-mark span { border-color: CanvasText; box-shadow: none; }
   .chamber::before, .chamber::after { display: none; }
   .sign-bar span, .test-progress-bar { background: Highlight; }
@@ -714,7 +923,7 @@ html.classic {
   @page { margin: 14mm 12mm; }
   body { background: #fff; color: #000; font-size: 9.5pt; line-height: 1.35; }
   body::before, .view-tools, .site-nav, .test-progress, .narrator, .hero-scene, .space-sky, .breach,
-  .skip-link, .sprite, .hero-actions .btn-blue, .chamber-num, .sign-bar, .sign-icons, .kicker,
+  .skip-link, .sprite, .level-scene, .hero-actions .btn-blue, .chamber-num, .sign-bar, .sign-icons, .kicker,
   .chamber::before, .chamber::after, .panel::before, .panel::after, .timeline li::before,
   .site-footer p:last-child { display: none !important; }
   .site-header { background: none; color: #000; border: 0; padding: 0; position: static !important; }
