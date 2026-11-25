@@ -8,12 +8,13 @@ CV en ligne sur une seule page HTML, présenté comme un parcours de **chambres 
 
 - HTML5 sémantique, écrit à la main
 - CSS local uniquement (`css/style.css`) : aucune dépendance externe, aucun build, aucun backend, aucune webfont
-- JavaScript vanilla en amélioration progressive (`js/app.js`)
+- JavaScript vanilla en amélioration progressive (`js/app.js`), et un moteur de rendu **WebGL2 écrit à la main** (`js/scene3d.js`, ≈ 25 ko, aucune bibliothèque)
 
 ## Concept
 
 - **On joue le CV niveau par niveau, sans scroll** : chaque section est une chambre de test (00 accueil → 06 contact) qui occupe l'écran. En bas, une vraie énigme à mécaniques de jeu de portails : poser deux portails reliés pour faire passer le cube par-dessus une vitre, rediriger un pont de lumière à travers des portails, viser un récepteur avec un laser, doser une plaque de propulsion, combiner gel orange (vitesse) et gel bleu (rebond). On prépare, on déclenche (bouton ou **E**) ; un échec donne un indice et on recommence. **Les informations du CV sont la récompense** : tant que l'énigme n'est pas résolue, elle occupe toute la salle et les panneaux restent dans le mur ; résolue, ils en sortent et la porte s'ouvre. Un lien discret « Passer l'énigme » (et le bouton « CV classique ») garde le CV lisible sans jouer.
-- **Vraies salles en 3D (CSS, sans bibliothèque)** : murs, sol et plafond en perspective ; la caméra suit la souris ou l'inclinaison du téléphone ; les plaques du CV sont des panneaux muraux qui sortent du mur sur des bras articulés et bougent toutes seules, des dalles du mur avancent et reculent ; les portails sont montés sur les murs ; le cube posé au sol s'attrape et se fait tourner ; on avance dans la salle à chaque changement de niveau.
+- **Rendu 3D réaliste en WebGL** : éclairage par les néons du plafond, ombres portées, sol brillant qui reflète les lumières, lumière colorée des portails sur les murs, et de **vrais portails** à travers lesquels on voit la salle depuis l'autre portail. Le moteur habille le DOM au pixel près : les éléments restent cliquables, utilisables au clavier et lisibles par un lecteur d'écran. Sans WebGL2, la version CSS 3D ci-dessous prend le relais.
+- **Salles en 3D CSS (repli, sans bibliothèque)** : murs, sol et plafond en perspective ; la caméra suit la souris ou l'inclinaison du téléphone ; les plaques du CV sont des panneaux muraux qui sortent du mur sur des bras articulés et bougent toutes seules, des dalles du mur avancent et reculent ; les portails sont montés sur les murs ; le cube posé au sol s'attrape et se fait tourner ; on avance dans la salle à chaque changement de niveau.
 - Navigation libre : menu des niveaux, flèches ← →, PageUp/PageDown, bouton Précédent du navigateur.
 - Décor réaliste en CSS/SVG, sans image : panneaux muraux biseautés, champs d'énergie, grilles de sol, portails au bord en flamme (filtre SVG) qui laissent voir l'autre côté.
 - Final : le plafond de la dernière chambre est éventré, on sort sur la Lune avec la Terre dans le ciel.
@@ -40,7 +41,8 @@ Puis ouvrir http://localhost:8000. La commande pour régénérer le PDF est dans
 ```
 index.html            page unique
 css/style.css         thème, composants, vue classique, impression
-js/app.js             portails, narrateur, vue classique
+js/app.js             jeu : niveaux, énigmes, caméra, vue classique
+js/scene3d.js         moteur de rendu WebGL2 fait main
 cv-olivier-dutoit.pdf export PDF du CV
 robots.txt, sitemap.xml référencement
 cv_base.md            contenu source du CV

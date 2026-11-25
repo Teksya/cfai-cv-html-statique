@@ -28,6 +28,9 @@ Contact : **lien vers le profil GitHub uniquement** (texte explicite, ex. « Voi
 - **Site 100 % statique** : aucun backend, aucune étape de build, aucun Node/npm, **aucune dépendance externe** (pas de CDN, pas de webfont). On sert le dossier et ça marche.
 - **HTML5** écrit à la main, **CSS local** dans `css/style.css` (CSS ordinaire, variables de thème dans `:root`). Pas de framework JS ni CSS.
 - JavaScript dans `js/app.js`, chargé avec `defer`, en **amélioration progressive**. Il ajoute `html.game` : **un niveau par écran, sans scroll de page** (le contenu d'une chambre défile dans `.room` si besoin). On change de niveau par la nav, les flèches ← →, PageUp/PageDown, le hash de l'URL (historique géré) ou la porte de sortie, avec un passage par un portail orange (`.warp`). Il gère aussi les énigmes, la barre de progression par niveau, `aria-current="step"` dans la nav, la voix du narrateur et la bascule « CV classique » (`html.classic` : page qui défile, mémorisée dans `localStorage`, forcée par `?classique`, imposée à l'impression). Sans JS, la page défile normalement avec toutes les chambres visibles et le lien PDF fonctionne : le contenu ne dépend jamais du script.
+- **Rendu 3D réaliste : `js/scene3d.js`**, un moteur **WebGL2 écrit à la main, sans bibliothèque** (la règle « aucune dépendance » tient). Il dessine la salle (panneaux muraux, sol brillant qui reflète les néons, plafond lumineux), l'éclairage (néons, lumière colorée des portails, pièces lumineuses), les ombres portées (shadow map), le cube, toutes les pièces d'énigme et de **vrais portails** : quand un bleu et un orange sont ouverts, chacun montre la salle vue depuis l'autre (rendu en texture, scène recadrée sur le plan du portail).
+  - **Principe à respecter : le moteur n'a aucune logique de jeu, il « habille » le DOM.** Chaque objet 3D est la peau d'un élément (table `SKINS` : sélecteur → fonction de dessin). À chaque image, `chain()` relit la position de l'élément dans le monde CSS 3D (offsets + `transform` calculés) et y dessine un maillage éclairé. La projection (`cssProjection`) reproduit exactement `perspective: 1000px` / `perspective-origin: 50% 42%` de `.chamber` et l'unité est le pixel CSS : WebGL et DOM se superposent au pixel près. Le DOM reste la zone cliquable, le focus clavier et le nom accessible ; les animations (CSS, Web Animations) et l'état (classes, `data-portal`, `data-gel`) sont lus tels quels. **Ajouter un objet = ajouter l'élément DOM + une entrée dans `SKINS`.**
+  - `app.js` appelle `CV3D.init(main)` ; si WebGL2 marche il pose `html.gl`, puis `CV3D.frame(section, yaw, pitch, t)` à chaque image avec les angles de caméra qu'il donne aussi au DOM, et `CV3D.travel()` pour le travelling entre niveaux. En mode `.game.gl`, le CSS rend le décor DOM invisible (pas `display: none` : il doit rester mesurable) et pose les pièces réellement à plat (`--flat: 90deg`) ou en travers (`--across: 90deg`). **Sans WebGL2 ou si le contexte est perdu, `html.gl` est absent et la salle CSS 3D prend le relais.** Le niveau final (espace) reste en CSS.
 - **Export PDF** : `cv-olivier-dutoit.pdf` est généré depuis la vue classique (voir « Régénérer le PDF »). Le régénérer et le commiter à chaque modification du contenu.
 
 ### Organisation du CSS
@@ -42,7 +45,8 @@ Contact : **lien vers le profil GitHub uniquement** (texte explicite, ex. « Voi
 .
 ├─ index.html            # la page (seule page du site)
 ├─ css/style.css         # thème, composants, vue classique, impression
-├─ js/app.js             # portails, narrateur, vue classique (amélioration progressive)
+├─ js/app.js             # jeu : niveaux, énigmes, caméra, vue classique (amélioration progressive)
+├─ js/scene3d.js         # moteur de rendu WebGL2 fait main (salle, lumières, ombres, portails)
 ├─ cv-olivier-dutoit.pdf # export PDF généré depuis la vue classique
 ├─ cv_base.md            # contenu source
 ├─ grille_evaluation.md  # grille de notation du sujet
