@@ -1160,6 +1160,86 @@ html.game { overflow: hidden; }
 
 .classic .stage { display: none !important; }
 
+/* ---------- One 3D world (game mode) ----------
+   Nothing is flat: the content, the puzzles and the props live in the
+   same space as the walls and turn with the camera. Plates hang in a
+   curve, puzzles stand on the floor deeper in the room, portals are
+   mounted on real walls, the cube sits on the floor. */
+.game .chamber-inner {
+  transform-style: preserve-3d;
+  transform-origin: 50% 50% calc(var(--depth) / -2);
+}
+.game .chamber::before, .game .chamber::after { display: none; } /* replaced by the 3D room */
+.game .chamber-head { transform: translateZ(50px); }
+/* deeper in the room than the plates; the gap above keeps it from hiding behind them */
+.game .level-scene { transform: translateZ(-60px); transform-style: preserve-3d; margin: 30px 0 0; }
+.game .puzzle-btn { font-size: 1.125rem; transform: translateZ(40px); }
+.game .exit-label { font-size: 1.125rem; }
+.game .laser-beam { transition: transform .12s linear; }
+.game .level-projets.is-aimed .laser-catcher::after { background: #ff8078; box-shadow: 0 0 18px 6px #ff3b30; }
+.game .level-projets:not(.is-cleared) .laser-emitter { cursor: crosshair; }
+
+/* other cube faces (cubes that can be spun need all six) */
+.cube-back { --face: #8a9298; --bumper: #343a3f; transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); }
+.cube-left { --face: #a9b1b7; --bumper: #454c52; transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); }
+.cube-bottom { --face: #7b8389; --bumper: #2e3438; transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); }
+.cube-back::after, .cube-left::after, .cube-bottom::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 40%; height: 40%; margin: -20% 0 0 -20%;
+  border-radius: 50%; background: radial-gradient(circle, rgba(255, 170, 70, .55), transparent 70%);
+}
+
+/* props mounted in the room: wide screens only */
+.wall .portal, .wall .observation, .stage-cube { display: none; }
+
+@media (min-width: 900px) {
+  .game .level-scene { transform: translateZ(-130px); margin-top: 64px; }
+  .game .puzzle-btn { font-size: 1.3125rem; min-height: 48px; }
+  .game .puzzle-btn .key { width: 34px; height: 34px; }
+  .game .exit-label { font-size: 1.3125rem; }
+
+  /* plates hang in a curve around the viewer */
+  .game .room { perspective: 1500px; margin: 0 -48px; padding: 12px 48px 28px; }
+  .game .chamber.is-in .grid-3 > .panel:nth-child(3n+1),
+  .game .chamber.is-in .grid-2 > .panel:nth-child(odd),
+  .game .chamber.is-in .timeline > .panel:nth-child(odd) { transform: rotateY(13deg) translateZ(18px); }
+  .game .chamber.is-in .grid-3 > .panel:nth-child(3n),
+  .game .chamber.is-in .grid-2 > .panel:nth-child(even),
+  .game .chamber.is-in .timeline > .panel:nth-child(even) { transform: rotateY(-13deg) translateZ(18px); }
+  .game .chamber.is-in .grid-3 > .panel:nth-child(3n+2) { transform: translateZ(-34px); }
+  .game .chamber.is-in .panel-flat { transform: rotateX(7deg) translateZ(-10px); }
+
+  /* arrival room: the flat scene gives way to real props */
+  .game .hero-scene { display: none; }
+  .game .hero .hero-grid { grid-template-columns: minmax(0, 540px); justify-content: start; }
+  .game .hero-text { transform: rotateY(9deg) translateZ(30px); transform-origin: left center; }
+
+  .game .wall .portal, .game .wall .observation, .game .stage-cube { display: block; }
+  .game .wall-back .observation {
+    top: 7%; left: 50%; width: 44%; height: 13%; transform: translateX(-50%);
+  }
+  .game .wall-back .portal-orange { left: 60%; top: 26%; width: 250px; height: 56%; transform: none; }
+  .game .wall-right .portal-blue {
+    left: 38%; top: 14%; width: 330px; height: 58%; transform: none;
+    cursor: pointer; pointer-events: auto;
+  }
+  .game .wall-right .portal-blue:hover { filter: brightness(1.2); }
+
+  .stage-cube {
+    position: absolute; left: 58%; bottom: 0; width: 120px; height: 120px;
+    transform: translateZ(-430px); transform-style: preserve-3d;
+    pointer-events: auto; cursor: grab; touch-action: none;
+    transition: transform .25s ease-out;
+  }
+  .stage-cube .cube3d { --s: 120px; transform: rotateY(-32deg); transition: none; }
+  /* lifted off the floor while you hold it */
+  .stage-cube.is-grabbed { cursor: grabbing; transform: translateZ(-430px) translateY(-70px); }
+  .stage-cube::after {
+    content: ""; position: absolute; left: -35%; right: -35%; bottom: -60%; height: 120%;
+    background: radial-gradient(closest-side, rgba(0, 0, 0, .6), transparent);
+    transform: rotateX(90deg);
+  }
+}
+
 /* ---------- Classic view (toggle, PDF export, printing) ----------
    A plain one-column CV: same HTML, all the facility decor removed. */
 html.classic {

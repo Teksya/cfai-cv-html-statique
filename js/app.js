@@ -162,8 +162,10 @@
     if (!section) return;
     var stage = section.querySelector('.stage');
     var inner = section.querySelector('.chamber-inner');
-    if (stage) stage.style.transform = 'rotateY(' + (cam.x * 9).toFixed(2) + 'deg) rotateX(' + (-cam.y * 6).toFixed(2) + 'deg)';
-    inner.style.transform = 'translate3d(' + (cam.x * -10).toFixed(1) + 'px,' + (cam.y * -6).toFixed(1) + 'px,0)';
+    // walls and content share one rotation and one pivot: a single world
+    var view = 'rotateY(' + (cam.x * 7).toFixed(2) + 'deg) rotateX(' + (-cam.y * 4.5).toFixed(2) + 'deg)';
+    if (stage) stage.style.transform = view;
+    inner.style.transform = stage ? view : '';
     var sky = section.querySelector('.space-sky');
     if (sky) sky.style.transform = 'translate3d(' + (cam.x * -24).toFixed(1) + 'px,' + (cam.y * -14).toFixed(1) + 'px,0) scale(1.06)';
   }
@@ -189,52 +191,100 @@
     panel.style.transform = '';
   });
 
-  // Hero cube: grab it and spin it, it keeps turning a little after release.
-  var heroCube = document.querySelector('.hero-cube');
-  if (heroCube) {
-    var cube = heroCube.querySelector('.cube3d');
-    var spin = { rx: -24, ry: -40, vx: 0, vy: 0, drag: null, raf: 0 };
-    var renderCube = function () {
+  // Arrival room props, built in the 3D world: an orange portal and the
+  // observation window on the back wall, a blue portal on the right wall,
+  // the cube standing on the floor. (Small screens keep the flat scene.)
+  var PORTAL = '<span class="portal-view"></span><svg class="portal-rim" viewBox="0 0 140 240"><use href="#portal-rim"/></svg>';
+  var CUBE = '<span class="cube3d"><span class="cube-face cube-front"></span><span class="cube-face cube-right"></span>' +
+    '<span class="cube-face cube-top"></span><span class="cube-face cube-back"></span>' +
+    '<span class="cube-face cube-left"></span><span class="cube-face cube-bottom"></span></span>';
+  var heroStage = chambers[0].querySelector('.stage');
+  if (heroStage) {
+    heroStage.querySelector('.wall-back').insertAdjacentHTML('beforeend',
+      '<span class="observation"></span><span class="portal portal-orange">' + PORTAL + '</span>');
+    heroStage.querySelector('.wall-right').insertAdjacentHTML('beforeend',
+      '<span class="portal portal-blue">' + PORTAL + '</span>');
+    heroStage.insertAdjacentHTML('beforeend', '<span class="stage-cube">' + CUBE + '</span>');
+  }
+
+  // Cubes can be grabbed and spun; they keep turning a little after release.
+  function makeSpinnable(holder, rx, ry) {
+    var cube = holder.querySelector('.cube3d');
+    var spin = { rx: rx, ry: ry, vx: 0, vy: 0, drag: null, raf: 0 };
+    function render() {
       cube.style.transform = 'rotateX(' + spin.rx.toFixed(1) + 'deg) rotateY(' + spin.ry.toFixed(1) + 'deg)';
-    };
-    var coast = function () {
-      spin.vx *= .94; spin.vy *= .94;
+    }
+    function coast() {
+      spin.vx *= .95; spin.vy *= .95;
       spin.rx += spin.vx; spin.ry += spin.vy;
-      renderCube();
+      render();
       if (Math.abs(spin.vx) + Math.abs(spin.vy) > .05) spin.raf = requestAnimationFrame(coast);
-    };
-    heroCube.addEventListener('pointerdown', function (event) {
+    }
+    holder.addEventListener('pointerdown', function (event) {
       cancelAnimationFrame(spin.raf);
       spin.drag = { x: event.clientX, y: event.clientY };
-      heroCube.setPointerCapture(event.pointerId);
-      heroCube.classList.add('is-grabbed');
+      holder.setPointerCapture(event.pointerId);
+      holder.classList.add('is-grabbed');
     });
-    heroCube.addEventListener('pointermove', function (event) {
+    holder.addEventListener('pointermove', function (event) {
       if (!spin.drag) return;
       spin.vy = (event.clientX - spin.drag.x) * .6;
       spin.vx = -(event.clientY - spin.drag.y) * .6;
       spin.drag = { x: event.clientX, y: event.clientY };
       spin.rx += spin.vx; spin.ry += spin.vy;
-      renderCube();
+      render();
     });
-    var release = function () {
+    function release() {
       if (!spin.drag) return;
       spin.drag = null;
-      heroCube.classList.remove('is-grabbed');
+      holder.classList.remove('is-grabbed');
       if (!reduceMotion.matches) spin.raf = requestAnimationFrame(coast);
-    };
-    heroCube.addEventListener('pointerup', release);
-    heroCube.addEventListener('pointercancel', release);
+    }
+    holder.addEventListener('pointerup', release);
+    holder.addEventListener('pointercancel', release);
   }
+  var flatCube = document.querySelector('.hero-cube');
+  if (flatCube) { flatCube.innerHTML = CUBE; makeSpinnable(flatCube, -24, -40); }
+  var floorCube = document.querySelector('.stage-cube');
+  if (floorCube) makeSpinnable(floorCube, 0, -32);
 
-  // The blue portal of the arrival room leads to level 01.
-  var heroPortal = document.querySelector('.hero-scene .portal-blue');
-  if (heroPortal) {
-    heroPortal.addEventListener('click', function (event) {
+  // The blue portals of the arrival room lead to level 01.
+  Array.prototype.forEach.call(document.querySelectorAll('.hero .portal-blue'), function (portal) {
+    portal.addEventListener('click', function (event) {
       if (isGame()) goTo(1, { push: true, focus: true, x: event.clientX, y: event.clientY });
     });
+  });
+
+  // Level 03: the laser emitter tracks the pointer. Keep the beam on the
+  // receiver for a moment and the level solves itself.
+  var laserScene = document.querySelector('.level-projets');
+  if (laserScene) {
+    var beam = laserScene.querySelector('.laser-beam');
+    var emitter = laserScene.querySelector('.laser-emitter');
+    var aimTimer = 0;
+    document.addEventListener('pointermove', function (event) {
+      if (!isGame() || chambers[current].id !== 'projets') return;
+      if (laserScene.classList.contains('is-cleared') || laserScene.classList.contains('is-busy')) return;
+      var r = emitter.getBoundingClientRect();
+      var angle = Math.atan2(event.clientY - (r.top + r.height / 2), event.clientX - r.right) * 180 / Math.PI;
+      angle = Math.max(-75, Math.min(30, angle));
+      beam.style.transform = 'rotate(' + angle.toFixed(1) + 'deg) scaleX(.6)';
+      var aimed = Math.abs(angle) < 4 && event.clientX > r.right + 40;
+      laserScene.classList.toggle('is-aimed', aimed);
+      if (!aimed) { clearTimeout(aimTimer); aimTimer = 0; return; }
+      if (!aimTimer) {
+        aimTimer = setTimeout(function () {
+          aimTimer = 0;
+          beam.style.transform = '';
+          laserScene.classList.remove('is-aimed');
+          laserScene.querySelector('.puzzle-btn').click();
+        }, 500);
+      }
+    }, { passive: true });
+    laserScene.querySelector('.puzzle-btn').addEventListener('click', function () { beam.style.transform = ''; });
   }
 
+  // ---------- Navigation ----------
   function indexFromHash() {
     var i = chamberIndex(location.hash.slice(1));
     return i < 0 ? 0 : i;
