@@ -13,6 +13,7 @@ CV en ligne sur une seule page HTML, présenté comme un parcours de **chambres 
 ## Concept
 
 - **On joue le CV niveau par niveau, sans scroll** : chaque section est une chambre de test (00 accueil → 06 contact) qui occupe l'écran. En bas, une énigme (lâcher le cube sur le bouton, activer le pont de lumière, orienter le laser, lancer le cube, ouvrir les tuyaux de gel) : on clique sur l'invite ou on appuie sur **E**, la porte s'ouvre, on la franchit pour passer au niveau suivant.
+- **Vraies salles en 3D (CSS, sans bibliothèque)** : murs, sol et plafond en perspective ; la caméra suit la souris ou l'inclinaison du téléphone ; les plaques s'inclinent sous le curseur ; le cube de l'accueil s'attrape et se fait tourner ; on avance dans la salle à chaque changement de niveau.
 - Navigation libre : menu des niveaux, flèches ← →, PageUp/PageDown, bouton Précédent du navigateur.
 - Décor réaliste en CSS/SVG, sans image : panneaux muraux biseautés, champs d'énergie, grilles de sol, portails au bord en flamme (filtre SVG) qui laissent voir l'autre côté.
 - Final : le plafond de la dernière chambre est éventré, on sort sur la Lune avec la Terre dans le ciel.
